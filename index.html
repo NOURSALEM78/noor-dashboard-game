@@ -11,7 +11,7 @@
     <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2 family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -256,6 +256,10 @@
 
     <!-- Script Zone -->
     <script>
+        // Initialize Canvas and Context first to prevent any ReferenceErrors
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+
         // Storage wrapper for safe loading
         const SafeStorage = {
             get: function(key, defaultVal) {
@@ -1118,13 +1122,6 @@
             ctx.restore();
         }
 
-        function gameLoop() {
-            updatePhysics();
-            updateEntities();
-            drawGame();
-            requestAnimationFrame(gameLoop);
-        }
-
         // --- HUD UPDATE & NOTIFICATIONS ---
         function updateHUD() {
             const activeStage = STAGES[currentLevel - 1];
@@ -1292,24 +1289,9 @@
             drawer.classList.contains('hidden') ? drawer.classList.remove('hidden') : drawer.classList.add('hidden');
         }
 
-        function logEvent(text, type = 'info') {
-            const consoleBox = document.getElementById('logConsole');
-            if (!consoleBox) return;
-            const row = document.createElement('div');
-            
-            let color = 'text-slate-400';
-            if (type === 'success') color = 'text-emerald-400';
-            if (type === 'error') color = 'text-rose-400';
-            if (type === 'warning') color = 'text-amber-400';
-
-            row.className = color;
-            row.innerText = `> ${text}`;
-            consoleBox.appendChild(row);
-            consoleBox.scrollTop = consoleBox.scrollHeight;
-        }
-
         // --- SAFE CANVAS SCALING ---
         function resizeCanvas() {
+            if (!canvas) return;
             const container = canvas.parentElement;
             if (!container) return;
 
