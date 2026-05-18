@@ -2,1143 +2,781 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>نور: صعود لوحة البيانات | Noor: Dashboard Ascend</title>
-    <!-- Tailwind CSS for modern holographic UI styling -->
+    <!-- Tailwind CSS for sleek UI -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for cinematic tech icons -->
+    <!-- FontAwesome for beautiful cyberpunk icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Cairo for beautiful futuristic Arabic typography -->
+    <!-- Google Fonts: Cairo for beautiful Arabic typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;950&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- Tone.js for dynamic atmospheric retro synth generator -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Tone.js for emotional retro synthesised audio effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     
     <style>
         body {
-            font-family: 'Cairo', 'Inter', sans-serif;
-            background-color: #02040a;
-            color: #f1f5f9;
-            overflow: hidden;
+            font-family: 'Cairo', sans-serif;
+            background-color: #030712; /* Gray 950 */
             user-select: none;
             -webkit-user-select: none;
             touch-action: none;
+            overflow: hidden;
+            height: 100dvh;
+            width: 100vw;
+            position: fixed;
         }
-        .neon-text-cyan {
-            text-shadow: 0 0 10px rgba(34, 211, 238, 0.8), 0 0 20px rgba(34, 211, 238, 0.3);
+        /* Custom Glowing & Glassmorphic effects */
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 0 20px rgba(56, 189, 248, 0.4);
         }
-        .neon-text-purple {
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.3);
+        .neon-border {
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.25);
         }
-        .neon-text-gold {
-            text-shadow: 0 0 10px rgba(245, 158, 11, 0.8), 0 0 20px rgba(245, 158, 11, 0.3);
+        .cyber-grid {
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(14, 165, 233, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(14, 165, 233, 0.02) 1px, transparent 1px);
         }
-        .neon-text-rose {
-            text-shadow: 0 0 10px rgba(244, 63, 94, 0.8), 0 0 20px rgba(244, 63, 94, 0.3);
-        }
-        /* Premium Cyber glassmorphism panels with micro-interactions */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(34, 211, 238, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.15);
         }
-        .glass-btn {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Hide scrollbar completely for retro game immersion */
+        ::-webkit-scrollbar {
+            display: none;
         }
-        .glass-btn:hover:not(:disabled) {
-            background: rgba(51, 65, 85, 0.8);
-            border-color: rgba(34, 211, 238, 0.6);
-            box-shadow: 0 0 15px rgba(34, 211, 238, 0.25);
-            transform: translateY(-2px);
-        }
-        .glass-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-        /* Custom level nodes inside the holographic grid */
-        .level-node {
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .level-node.unlocked:hover {
-            transform: scale(1.05);
-            border-color: rgba(34, 211, 238, 0.8);
-            box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
-        }
-        /* Shaking visual effects for high stress alerts */
-        .stress-shake {
-            animation: stressShake 0.15s infinite;
-        }
-        @keyframes stressShake {
-            0%, 100% { transform: translate(0, 0); }
-            20% { transform: translate(-3px, 2px); }
-            40% { transform: translate(2px, -3px); }
-            60% { transform: translate(-1px, 2px); }
-            80% { transform: translate(3px, 1px); }
+        /* Touch safety utility */
+        .no-double-tap {
+            touch-action: manipulation;
         }
     </style>
 </head>
-<body class="w-screen h-screen flex flex-col relative overflow-hidden">
+<body class="w-full h-full flex flex-col text-slate-100 cyber-grid overflow-hidden">
 
-    <!-- Ambient background grids -->
-    <div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: linear-gradient(rgba(34,211,238,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.1) 1px, transparent 1px); background-size: 60px 60px;"></div>
-    
-    <header class="w-full bg-slate-950/85 backdrop-blur-md border-b border-cyan-500/20 px-4 md:px-6 py-3 flex justify-between items-center z-10 shrink-0">
+    <!-- Top Futuristic Dashboard Header (Dynamic Island Safe) -->
+    <header class="bg-slate-950/80 backdrop-blur-md border-b border-sky-500/20 px-4 md:px-6 pt-12 pb-3 md:py-3 flex justify-between items-center z-20 shrink-0 relative">
         <div class="flex items-center gap-2 md:gap-3">
-            <div class="w-8 h-8 md:w-10 md:h-10 rounded bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center animate-pulse">
-                <span class="text-cyan-400 font-black text-lg md:text-xl font-mono">N</span>
+            <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-sky-500/10 flex items-center justify-center border border-sky-400/30 animate-pulse">
+                <span class="text-sky-400 font-black text-sm md:text-base">N</span>
             </div>
             <div>
-                <h1 class="text-xs md:text-md lg:text-lg font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-cyan-400 to-purple-400 neon-text-cyan">نور: صعود لوحة البيانات</h1>
-                <p class="text-[8px] md:text-[9px] text-slate-400 tracking-wider font-mono">SAUDI CYBERPUNK PSYCHOLOGICAL PLATFORMER • v6.0</p>
+                <h1 class="text-sm md:text-lg font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-sky-400 to-indigo-400">نور: صعود لوحة البيانات</h1>
+                <p class="text-[8px] md:text-[10px] text-slate-400 tracking-wider uppercase">Saudi Cyberpunk Psychological Platformer • v6.0</p>
             </div>
         </div>
 
-        <div class="flex items-center gap-2 md:gap-6">
-            <!-- Team Trust HUD bar -->
-            <div class="hidden sm:flex flex-col items-end">
-                <div class="flex items-center gap-1 text-[9px] md:text-[11px] text-slate-400">
-                    <i class="fa-solid fa-users text-emerald-400"></i>
-                    <span>ثقة الفريق (Team Trust)</span>
+        <!-- Stress Meter and Control Buttons -->
+        <div class="flex items-center gap-2 md:gap-4">
+            <!-- Mental Burnout / Stress Index Indicator -->
+            <div class="flex flex-col items-end w-24 md:w-36">
+                <div class="flex justify-between w-full text-[9px] md:text-xs text-rose-400 mb-0.5 font-bold">
+                    <span>مؤشر الاحتراق النفسي 🧠</span>
                 </div>
-                <div class="w-16 md:w-24 bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-700 mt-1">
-                    <div id="hudTrust" class="bg-gradient-to-l from-emerald-400 to-teal-400 h-full w-[80%] transition-all duration-300"></div>
-                </div>
-            </div>
-
-            <!-- Stress Level HUD bar -->
-            <div class="flex flex-col items-end">
-                <div class="flex items-center gap-1 text-[9px] md:text-[11px] text-slate-400">
-                    <i class="fa-solid fa-brain text-rose-400"></i>
-                    <span>مؤشر الاحتراق النفسي (Stress Index)</span>
-                </div>
-                <div class="w-20 md:w-32 bg-slate-800 rounded-full h-1.5 md:h-2 overflow-hidden border border-slate-700 mt-1 relative">
-                    <div id="hudStress" class="bg-gradient-to-l from-rose-500 to-purple-500 h-full w-[20%] transition-all duration-300"></div>
+                <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden border border-rose-950/40">
+                    <div id="stressBar" class="bg-gradient-to-l from-rose-500 via-purple-500 to-sky-400 h-full w-[20%] transition-all duration-300"></div>
                 </div>
             </div>
 
-            <!-- Mobile Sensor Toggle Button -->
-            <button onclick="toggleMobileSensorsDrawer()" class="lg:hidden w-8 h-8 rounded border border-slate-800 hover:border-cyan-400 flex items-center justify-center transition glass-btn">
-                <i class="fa-solid fa-scroll text-cyan-400 text-xs"></i>
+            <!-- Sound Controller -->
+            <button id="soundToggle" onclick="toggleSound()" class="w-8 h-8 md:px-3 md:py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-sky-500 transition text-xs flex items-center justify-center gap-2 no-double-tap">
+                <i id="soundIcon" class="fa-solid fa-volume-high text-sky-400"></i>
+                <span id="soundText" class="hidden md:inline text-[10px] font-bold">مفعّل</span>
             </button>
 
-            <!-- Mute Synth Button -->
-            <button onclick="toggleAudio()" class="w-8 h-8 md:w-10 md:h-10 rounded border border-slate-800 hover:border-cyan-400 flex items-center justify-center transition glass-btn">
-                <i id="audioIcon" class="fa-solid fa-volume-mute text-slate-400 text-xs md:text-sm"></i>
+            <!-- Menu / Pause Button -->
+            <button onclick="togglePauseMenu()" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 hover:border-sky-500 transition flex items-center justify-center text-xs no-double-tap">
+                <i class="fa-solid fa-sliders text-sky-400"></i>
             </button>
         </div>
     </header>
 
-    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative w-full">
+    <!-- Main Game Canvas Area (Fills 100% Mobile Space) -->
+    <main class="flex-1 flex overflow-hidden relative w-full h-full bg-[#020617]">
+        <!-- The Main Game Canvas -->
+        <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair z-10"></canvas>
 
-        <!-- Left Column: Serein Sidebar for Records & Dialogues (Hidden on mobile by default, toggled via floating drawer) -->
-        <section id="sereinSidebar" class="hidden lg:flex w-full lg:w-80 bg-slate-950/90 border-r border-slate-800/80 p-4 flex-col gap-4 overflow-y-auto shrink-0 z-10 transition-all duration-300">
-            
-            <!-- Chapter & Level detail display cards -->
-            <div class="glass-panel p-4 rounded-xl border border-cyan-500/20 relative">
-                <span class="text-[10px] text-cyan-400 font-mono tracking-widest block uppercase">CURRENT SECTOR</span>
-                <h3 id="currentChapterTitle" class="text-md font-bold text-slate-100 mt-1">الفصل الأول: الدخول إلى النظام</h3>
-                <p id="currentLevelDesc" class="text-[11px] text-slate-400 mt-2 leading-relaxed">
-                    تبدأ نور بربط خوادم الرؤية لأول مرة. المنصات هنا هادئة ونظيفة، ولكن هناك شعوراً خفياً بثقل المسؤولية القادمة.
+        <!-- Dynamic Game Dialogue Box Overlay -->
+        <div id="dialogueContainer" class="absolute bottom-32 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-xl glass-panel p-4 rounded-xl z-20 hidden">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-sky-500/10 border border-sky-400 flex items-center justify-center text-xl shrink-0" id="dialogueAvatar">💡</div>
+                <div class="flex-1">
+                    <h4 class="text-xs font-bold text-sky-300 mb-1" id="dialogueSpeaker">نور (مديرة العمليات)</h4>
+                    <p class="text-xs md:text-sm text-slate-100 leading-relaxed" id="dialogueText">جاري تحميل حوارات الوعي...</p>
+                    <!-- Options container for choices -->
+                    <div id="dialogueOptions" class="mt-3 space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cinematic Screen Shake / Error Flash Damage overlay -->
+        <div id="damageFlash" class="absolute inset-0 bg-rose-500/0 pointer-events-none z-10 transition-all duration-200"></div>
+
+        <!-- Floating Sensorial Mobile Dialogues Opener (Visible on Mobile only) -->
+        <button id="mobileLogOpener" onclick="openSensoryOverlay()" class="lg:hidden absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-950/85 border border-purple-500/30 text-purple-300 flex items-center justify-center z-20 shadow-lg shadow-purple-950/30 no-double-tap">
+            <i class="fa-solid fa-brain animate-pulse"></i>
+        </button>
+
+        <!-- Right Sidebar: Psychological Records, Level Objectives, Upgrades (Desktop view, Hidden on Mobile) -->
+        <section id="desktopSidebar" class="hidden lg:flex w-80 bg-slate-950/95 border-r border-sky-500/10 p-4 flex-col gap-4 overflow-y-auto shrink-0 z-10 order-last">
+            <!-- Level Info Card -->
+            <div class="p-3 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-sky-500/20">
+                <span class="text-[9px] font-bold text-sky-400 uppercase tracking-widest block mb-1">المهمة الحالية</span>
+                <h3 id="sidebarStageTitle" class="font-extrabold text-slate-100 text-sm">المرحلة 1: تسجيل الدخول</h3>
+                <p id="sidebarStageDesc" class="text-xs text-slate-400 mt-1 leading-relaxed">أنت في بداية الطريق. واجه مؤشرات الأداء الضخمة واستجمع شتات تركيزك لبدء تسلق لوحة التحكم.</p>
+                <div class="mt-3 p-2 bg-slate-950 rounded-lg border border-slate-800">
+                    <span class="text-[10px] text-slate-400 block mb-1">التقدم والارتفاع</span>
+                    <div class="flex justify-between items-center text-xs font-bold text-sky-300">
+                        <span id="statAltitude">0 م / 2200م</span>
+                        <span id="statProgress">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objectives Checklist -->
+            <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800">
+                <span class="text-[10px] font-bold text-indigo-400 block mb-2">أهداف الفصل</span>
+                <ul id="objectiveList" class="space-y-1.5 text-xs text-slate-300">
+                    <!-- Loaded dynamically based on stage -->
+                </ul>
+            </div>
+
+            <!-- Memory Fragments & Truth fragments -->
+            <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800">
+                <span class="text-[10px] font-bold text-emerald-400 block mb-2">المدخرات السيكولوجية</span>
+                <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                    <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+                        <span class="text-slate-400 block text-[9px]">شظايا الحقيقة 🔑</span>
+                        <span id="truthCount" class="font-bold text-emerald-400">0 / 0</span>
+                    </div>
+                    <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+                        <span class="text-slate-400 block text-[9px]">الذكريات المسترجعة 🧠</span>
+                        <span id="memoryCount" class="font-bold text-indigo-400">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Operations Log Console -->
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex-1 flex flex-col min-h-[120px]">
+                <span class="text-[9px] font-bold text-sky-500 uppercase block mb-1">سجل الوعي والألم (Log)</span>
+                <div id="logConsole" class="text-[10px] font-mono text-slate-400 h-28 overflow-y-auto flex flex-col gap-1 pr-1">
+                    <div>> تم تحميل الهوية الرقمية: نور.</div>
+                    <div>> نبضات القلب مستقرة... العبء الوظيفي متزايد.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Floating Mobile Sensory & Records Overlay (Triggered by Brain icon) -->
+        <div id="mobileSensoryOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-40 hidden flex-col p-6 overflow-y-auto lg:hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-extrabold text-lg text-purple-400 flex items-center gap-2">
+                    <i class="fa-solid fa-brain"></i>
+                    سجل الوعي والذكريات المسترجعة
+                </h3>
+                <button onclick="closeSensoryOverlay()" class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white no-double-tap">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-4 flex-1">
+                <div class="p-3 bg-slate-900 rounded-xl border border-purple-500/20">
+                    <span class="text-xs text-purple-300 font-bold block mb-1">الأهداف الحالية للجوال</span>
+                    <ul id="mobileObjectiveList" class="space-y-1.5 text-xs text-slate-300"></ul>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 block">شظايا الحقيقة 🔑</span>
+                        <span id="mobileTruthCount" class="text-lg font-bold text-emerald-400">0</span>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 block">الذكريات المسترجعة 🧠</span>
+                        <span id="mobileMemoryCount" class="text-lg font-bold text-indigo-400">0</span>
+                    </div>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex-1 flex flex-col">
+                    <span class="text-[10px] text-slate-400 block mb-2">سجل الأفكار المباشر</span>
+                    <div id="mobileLogConsole" class="text-[10px] font-mono text-slate-300 overflow-y-auto h-40 space-y-1"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mission Control / Game Configuration Menu (Overlay) -->
+        <div id="pauseMenuOverlay" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md z-30 flex items-center justify-center p-4">
+            <div class="w-full max-w-xl bg-slate-900 border border-sky-500/30 rounded-2xl p-6 shadow-2xl relative max-h-[90dvh] overflow-y-auto">
+                <h3 class="text-2xl font-black text-sky-400 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders"></i>
+                    غرفة التحكم في المهمة
+                </h3>
+                <p class="text-xs text-slate-400 leading-relaxed mb-6">
+                    التحق بغرفة القيادة والسيطرة لإدارة أزمة الخوادم المتصلة بنظام نور. اختر صعوبة التسلق وتحكم بالفيزياء السلوكية للمستويات.
                 </p>
-                <div class="mt-3 text-[10px] font-mono flex items-center justify-between text-slate-500 border-t border-slate-800/60 pt-2">
-                    <span>LEVEL: <span id="hudLevelNum">1/10</span></span>
-                    <span>STAGE PERMIT: <span id="hudPermit" class="text-cyan-400">LEVEL 1</span></span>
-                </div>
-            </div>
 
-            <!-- Collected fragments dashboard item -->
-            <div class="glass-panel p-4 rounded-xl flex-1 flex flex-col gap-2 min-h-[120px]">
-                <h4 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-key text-amber-400 animate-pulse"></i>
-                    <span>شظايا الذاكرة والحقيقة المجمّعة</span>
-                </h4>
-                <div id="memoriesContainer" class="flex-1 flex flex-col gap-2 overflow-y-auto pr-1 text-[11px] text-slate-400 justify-center text-center">
-                    <p class="italic text-slate-500 text-[10px]">اجمع شظايا الذكاء والبيانات لإيجاد حقيقة النظام هنا...</p>
-                </div>
-            </div>
-
-            <!-- Noor thoughts real-time console logger -->
-            <div class="bg-slate-950/95 p-3 rounded-lg border border-slate-900 font-mono text-[10px] text-slate-400 h-28 shrink-0 flex flex-col shadow-inner">
-                <span class="text-cyan-500 font-bold mb-1 uppercase tracking-wider">NOOR'S SENSORY LOG</span>
-                <div id="thoughtLogs" class="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 text-right">
-                    <div>> بدء تشغيل خوادم التحليل الكبرى.</div>
-                    <div>> "الجميع يعتمد عليّ في إنجاز هذا العرض التقديمي للرئيس التنفيذي اليوم."</div>
-                </div>
-            </div>
-        </section>
-
-        <section id="canvasContainer" class="flex-1 relative overflow-hidden bg-[#02040a] flex items-center justify-center">
-            
-            <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair"></canvas>
-
-            <!-- Objective Alert Popup Box -->
-            <div id="objectiveAlert" class="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-950/95 border border-cyan-400/40 text-cyan-400 text-xs font-bold px-5 py-2.5 rounded-full shadow-lg shadow-cyan-400/10 pointer-events-none hidden transition duration-300 transform scale-90 z-20">
-                <i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="objectiveAlertText">الهدف لم يكتمل بعد!</span>
-            </div>
-
-            <!-- Floating Pause/Control Button -->
-            <button id="pauseGameBtn" onclick="pauseActiveGame()" class="absolute top-4 right-4 w-10 h-10 rounded-lg border border-cyan-500/30 hover:border-cyan-400 bg-slate-950/85 hover:bg-slate-900/90 flex items-center justify-center transition z-20 shadow-lg pointer-events-auto hidden">
-                <i class="fa-solid fa-sliders text-cyan-400"></i>
-            </button>
-
-            <!-- Pause/Control Overlay Modal -->
-            <div id="pauseOverlay" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-30 flex items-center justify-center p-4 hidden">
-                <div class="w-full max-w-md glass-panel p-6 rounded-2xl border border-cyan-500/40 shadow-2xl relative text-right">
-                    <h3 class="text-md font-black text-cyan-400 border-b border-slate-800/80 pb-3 mb-4 flex items-center justify-between">
-                        <span>غرفة التحكم والتعليق المؤقت</span>
-                        <i class="fa-solid fa-circle-pause text-cyan-400 animate-pulse text-lg"></i>
-                    </h3>
-                    
-                    <!-- Stage Requirements Checklist -->
-                    <div class="mb-5 bg-slate-900/60 p-4 rounded-xl border border-slate-850">
-                        <span class="text-[9px] text-cyan-400 font-mono tracking-wider block uppercase">CURRENT OBJECTIVE</span>
-                        <h4 id="pauseStageTitle" class="text-xs font-extrabold text-slate-100 mt-1">المرحلة الحالية</h4>
-                        <p id="pauseStageDesc" class="text-[10px] text-slate-400 mt-1.5 leading-relaxed"></p>
-                        <div class="mt-3.5 p-2.5 bg-slate-950/80 rounded-lg border border-cyan-500/10 flex items-center justify-between text-xs">
-                            <span id="pauseGoalProgress" class="text-cyan-400 font-mono font-bold text-sm">0 / 0</span>
-                            <span class="text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-list-check text-cyan-400"></i> متطلب الإنجاز الحجمي للهدف:</span>
-                        </div>
-                    </div>
-
-                    <!-- Instant Difficulty Tuning -->
-                    <div class="mb-4">
-                        <span class="text-xs font-bold text-slate-400 block mb-2"><i class="fa-solid fa-gauge-high text-cyan-400"></i> ضبط درجة الضغط فوراً (Difficulty SLA):</span>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button id="pauseDiffEasy" onclick="setPauseDifficulty('easy')" class="py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/15 text-emerald-400 text-[10px] font-bold transition">مستقر (سهل)</button>
-                            <button id="pauseDiffMedium" onclick="setPauseDifficulty('medium')" class="py-1.5 rounded-lg border border-cyan-400/20 bg-cyan-400/5 hover:bg-cyan-400/15 text-cyan-400 text-[10px] font-bold transition">مضغوط (متوسط)</button>
-                            <button id="pauseDiffHard" onclick="setPauseDifficulty('hard')" class="py-1.5 rounded-lg border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/15 text-rose-400 text-[10px] font-bold transition">حرج (صعب)</button>
-                        </div>
-                        <button onclick="rebuildStageWithNewDiff()" class="w-full mt-2.5 py-1.5 bg-slate-900 hover:bg-slate-850 text-[10px] text-cyan-300 font-bold rounded-lg border border-cyan-500/15 transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-arrows-rotate"></i> إعادة بناء المرحلة بالصعوبة الجديدة
+                <!-- Step 1: Difficulty Level Selector -->
+                <div class="mb-5">
+                    <span class="text-xs font-bold text-indigo-400 block mb-2">1. ضبط مستوى ضغط العمل (الصعوبة):</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setDifficulty('easy')" id="diffBtn_easy" class="py-2 px-3 rounded-xl text-xs font-bold transition border border-emerald-500/20 bg-emerald-950/20 text-emerald-300 no-double-tap">
+                            مستقر (سهل)
                         </button>
-                    </div>
-
-                    <!-- Action buttons -->
-                    <div class="flex flex-col gap-2">
-                        <button onclick="resumeActiveGame()" class="w-full py-2.5 bg-gradient-to-l from-cyan-500 to-teal-500 text-slate-950 font-black rounded-xl text-xs transition transform hover:scale-[1.01] shadow-md flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-play"></i> استئناف اللعب
+                        <button onclick="setDifficulty('medium')" id="diffBtn_medium" class="py-2 px-3 rounded-xl text-xs font-bold transition border border-sky-500/20 bg-slate-900 text-slate-400 no-double-tap">
+                            مضغوط (متوسط)
                         </button>
-                        <button onclick="abortMission()" class="w-full py-2 bg-slate-900 hover:bg-rose-950/20 text-slate-400 hover:text-rose-400 rounded-xl text-xs font-bold border border-slate-850 transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i> انسحاب والعودة للغرفة الرئيسية
+                        <button onclick="setDifficulty('hard')" id="diffBtn_hard" class="py-2 px-3 rounded-xl text-xs font-bold transition border border-rose-500/20 bg-slate-900 text-slate-400 no-double-tap">
+                            حرج (صعب)
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Narrative Dialogue screen overlays -->
-            <div id="narrativeOverlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md z-20 flex items-center justify-center p-4 hidden">
-                <div class="w-full max-w-xl glass-panel p-6 rounded-2xl border border-cyan-500/40 shadow-2xl relative text-right transition-all">
-                    <div class="flex items-center gap-3 mb-4 border-b border-slate-800 pb-3">
-                        <div class="w-9 h-9 rounded-full bg-cyan-500/25 border border-cyan-400 flex items-center justify-center text-sm">💡</div>
-                        <div>
-                            <h4 id="speakerName" class="font-extrabold text-cyan-400 text-sm">نـور</h4>
-                            <p id="speakerSubtitle" class="text-[10px] text-slate-500 uppercase tracking-widest">operations leader</p>
-                        </div>
-                    </div>
-                    <p id="narrativeText" class="text-xs md:text-sm text-slate-200 leading-relaxed mb-6 min-h-[50px]">
-                        "لا يمكنني ارتكاب الأخطاء اليوم. الخوادم الوطنية يجب أن تعمل بكفاءة 100%. الضغط يزداد..."
-                    </p>
-                    <div id="dialogueOptions" class="flex flex-col gap-2">
-                        <!-- Loaded dynamically -->
+                <!-- Step 2: Stage / Level Grid (Unlocked based on progression) -->
+                <div class="mb-6">
+                    <span class="text-xs font-bold text-indigo-400 block mb-2">2. خريطة فصول ونواة البيانات (المراحل):</span>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1 border border-slate-800 rounded-xl" id="stagesMapGrid">
+                        <!-- Loaded Dynamically via JS with Lock/Unlock states -->
                     </div>
                 </div>
+
+                <!-- Step 3: Mobile Controls Mode Toggle -->
+                <div class="mb-6 flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="text-xs font-bold text-slate-200 block">🎮 أزرار تحكم الجوال اللمسية</span>
+                        <span class="text-[9px] text-slate-400 block">تفعيل لوحة التوجيه السفلية للعب بالأصابع على الشاشات الذكية</span>
+                    </div>
+                    <button id="mobileModeToggle" onclick="toggleMobileControlsMode()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-sky-400 no-double-tap">
+                        تمكين وضع الجوال
+                    </button>
+                </div>
+
+                <!-- Action Button -->
+                <button onclick="closePauseMenu()" class="w-full py-3 bg-gradient-to-l from-sky-400 to-indigo-600 hover:from-sky-500 hover:to-indigo-700 rounded-xl font-black text-white text-sm tracking-wide shadow-lg shadow-sky-500/20 transition-all duration-300 transform active:scale-[0.98] no-double-tap">
+                    تطبيق الإعدادات وبدء النظام <i class="fa-solid fa-play mr-1"></i>
+                </button>
             </div>
+        </div>
 
-            <div id="menuOverlay" class="absolute inset-0 bg-slate-950/95 z-30 flex flex-col items-center p-6 overflow-y-auto">
-                <div class="max-w-4xl text-center flex flex-col items-center my-auto w-full">
-                    <span class="px-3 py-1 bg-cyan-500/10 border border-cyan-400/30 rounded text-[9px] md:text-[10px] font-mono text-cyan-300 tracking-widest mb-3 uppercase neon-text-cyan">SAUDI CYBERPUNK PSYCHOLOGICAL PLATFORMER</span>
-                    <h1 class="text-2xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-l from-cyan-400 via-teal-300 to-purple-500 mb-1 leading-tight">نور: صعود لوحة البيانات</h1>
-                    <p class="text-[10px] md:text-xs text-slate-400 font-light max-w-lg mb-4 md:mb-6 leading-relaxed">
-                        اكتشف رحلة سردية نفسية فريدة داخل عوالم لوحة تحكم عملاقة. رافق "نور" في صعودها الشاق بين المخططات والتقارير لتفادي الاحتراق الداخلي وإنقاذ النظام والذات.
-                    </p>
-
-                    <!-- NEW: Mobile Optimized Toggle Indicator -->
-                    <div class="w-full max-w-xl text-right mb-4 bg-slate-900/60 p-3 rounded-xl border border-cyan-500/15 flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-mobile-screen text-cyan-400 animate-pulse"></i> تحسين للأجهزة المحمولة واللمس (Mobile Mode):</span>
-                        <button id="mobileModeToggle" onclick="toggleMobilePlayMode()" class="px-4 py-1.5 rounded-lg text-[10px] font-bold border transition duration-300 bg-cyan-500/20 text-cyan-300 border-cyan-400/40">مفعّل</button>
+        <!-- End of Game / Next Level Overlay -->
+        <div id="endOverlay" class="absolute inset-0 bg-slate-950/95 z-30 flex items-center justify-center p-4 hidden">
+            <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl text-center">
+                <span id="endIcon" class="text-5xl block mb-3 animate-bounce">🏆</span>
+                <h3 id="endTitle" class="text-xl font-black text-emerald-400 mb-1">تمت تهيئة الخوادم بنجاح</h3>
+                <p id="endDesc" class="text-xs text-slate-300 leading-relaxed mb-5">لقد تمكنت نور من التغلب على أزمة النواة وإثبات ريادتها.</p>
+                
+                <div class="grid grid-cols-2 gap-3 mb-5 text-xs text-slate-400 bg-slate-950 p-3 rounded-xl">
+                    <div>
+                        <span class="block text-[10px]">معدل استقرار الأداء</span>
+                        <span id="endScore" class="font-bold text-emerald-400">0</span>
                     </div>
-
-                    <!-- STEP 1: Difficulty level selection -->
-                    <div class="w-full max-w-xl text-right mb-4">
-                        <span class="text-xs font-bold text-slate-400 block mb-2"><i class="fa-solid fa-gauge-high text-cyan-400"></i> ١. اختر درجة الضغط (SLA Difficulty):</span>
-                        <div class="grid grid-cols-3 gap-2.5">
-                            <button id="diffEasy" onclick="setDifficulty('easy')" class="py-2 rounded-xl border text-[10px] md:text-xs font-bold transition">مستقر (سهل)</button>
-                            <button id="diffMedium" onclick="setDifficulty('medium')" class="py-2 rounded-xl border text-[10px] md:text-xs font-bold transition">مضغوط (متوسط)</button>
-                            <button id="diffHard" onclick="setDifficulty('hard')" class="py-2 rounded-xl border text-[10px] md:text-xs font-bold transition">حرج (صعب جداً)</button>
-                        </div>
+                    <div>
+                        <span class="block text-[10px]">الارتفاع المحقق</span>
+                        <span id="endAltitude" class="font-bold text-sky-400">0م</span>
                     </div>
+                </div>
 
-                    <!-- STEP 2: Stages selection map -->
-                    <div class="w-full max-w-2xl text-right mb-4 md:mb-6">
-                        <span class="text-xs font-bold text-slate-400 block mb-2.5"><i class="fa-solid fa-map-location-dot text-cyan-400"></i> ٢. اختر خريطة الملفات والمستويات (Stages Map):</span>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-1.5 md:gap-2" id="stagesGrid">
-                            <!-- Injected by JavaScript -->
-                        </div>
-                    </div>
-
-                    <!-- Selected stage info widget -->
-                    <div id="selectedStageWidget" class="w-full max-w-xl glass-panel p-4 rounded-xl text-right mb-4 md:mb-6 border-cyan-500/30 hidden">
-                        <span class="text-[9px] text-cyan-400 font-mono block tracking-widest" id="widgetSub">STAGE 1</span>
-                        <h4 class="text-xs font-extrabold text-slate-200 mt-0.5" id="widgetTitle">اسم المرحلة</h4>
-                        <p class="text-[10px] text-slate-400 leading-relaxed mt-1" id="widgetDesc">الوصف هنا</p>
-                        <div class="mt-2 text-[10px] text-amber-400 font-bold border-t border-slate-800 pt-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-circle-check"></i> <span>المطلوب للإنجاز: <span id="widgetGoal">جمع البيانات</span></span>
-                        </div>
-                    </div>
-
-                    <button id="btnLaunch" onclick="launchSystem()" class="px-10 py-3 bg-gradient-to-l from-cyan-500 to-teal-500 text-slate-950 font-black rounded-xl transition duration-300 transform hover:scale-[1.03] shadow-lg shadow-cyan-500/20 text-xs md:text-sm flex items-center gap-2" disabled>
-                        <span>يرجى اختيار مرحلة لبدء النظام</span>
-                        <i class="fa-solid fa-power-off"></i>
+                <div class="space-y-2">
+                    <button id="endPrimaryBtn" onclick="nextLevelOrRestart()" class="w-full py-2.5 bg-gradient-to-l from-sky-400 to-emerald-500 rounded-xl font-bold text-slate-950 text-xs no-double-tap">
+                        بدء المرحلة التالية 🚀
+                    </button>
+                    <button onclick="togglePauseMenu()" class="w-full py-2.5 bg-slate-800 rounded-xl font-bold text-slate-300 text-xs border border-slate-700 no-double-tap">
+                        العودة لخريطة المراحل
                     </button>
                 </div>
             </div>
+        </div>
 
-            <div id="endOverlay" class="absolute inset-0 bg-slate-950/95 z-30 flex flex-col items-center justify-center p-6 text-center hidden">
-                <div class="max-w-xl glass-panel p-8 rounded-3xl border border-cyan-500/30 shadow-2xl relative">
-                    <div id="endEmoji" class="text-6xl mb-4 animate-bounce">✨</div>
-                    <h3 id="endTitle" class="text-2xl font-black text-emerald-400 mb-3">لقد اتخذت قراركِ النهائي</h3>
-                    <p id="endDesc" class="text-xs md:text-sm text-slate-300 leading-relaxed mb-6">
-                        الوصف النهائي للمخرج النفسي المختار...
-                    </p>
-                    
-                    <button onclick="backToControl()" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl font-bold text-xs transition border border-slate-800 flex items-center justify-center gap-2 mx-auto">
-                        <span>العودة لغرفة التحكم (Control Room)</span>
-                        <i class="fa-solid fa-house"></i>
-                    </button>
-                </div>
+        <!-- 🕹️ PERFECT MOBILE CONTROLS OVERLAY (Fixed Layout, Swapped & Aligned Arrow Buttons) -->
+        <div id="mobileController" class="absolute bottom-6 left-6 right-6 z-20 flex justify-between items-center pointer-events-none lg:hidden hidden">
+            <!-- Swapped & Adjusted Directional Arrow Controls (Left: far left, Right: next to it) -->
+            <div class="flex gap-4 pointer-events-auto">
+                <button id="btnLeft" class="w-16 h-16 rounded-full glass-panel active:bg-sky-500/40 border border-sky-400/30 active:scale-95 flex items-center justify-center text-sky-400 text-2xl transition select-none shadow-xl shadow-sky-950/40 no-double-tap">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button id="btnRight" class="w-16 h-16 rounded-full glass-panel active:bg-sky-500/40 border border-sky-400/30 active:scale-95 flex items-center justify-center text-sky-400 text-2xl transition select-none shadow-xl shadow-sky-950/40 no-double-tap">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
-
-            <!-- Victory Stage Intermediate Overlay -->
-            <div id="victoryOverlay" class="absolute inset-0 bg-slate-950/95 z-30 flex flex-col items-center justify-center p-6 text-center hidden">
-                <div class="max-w-md glass-panel p-6 rounded-2xl border border-emerald-500/30 shadow-xl">
-                    <div class="text-5xl mb-3">🏆</div>
-                    <h3 class="text-lg font-black text-emerald-400 mb-1">اكتمل الترحيل والتحقق بنجاح!</h3>
-                    <p class="text-xs text-slate-400 leading-relaxed mb-5" id="victoryModalDesc">تم تصفية متطلبات المرحلة وصعود نور للمرحلة الأعلى.</p>
-                    <div class="flex gap-2">
-                        <button onclick="backToControl()" class="flex-1 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-lg text-xs font-bold transition">خريطة المراحل</button>
-                        <button id="btnNextStage" onclick="playNextStage()" class="flex-1 py-2 bg-gradient-to-l from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 rounded-lg text-xs font-bold transition transform hover:scale-[1.02]">المرحلة التالية 🚀</button>
-                    </div>
-                </div>
+            <!-- Jump/Ascend Button on the bottom-right corner -->
+            <div class="pointer-events-auto">
+                <button id="btnJump" class="w-18 h-18 rounded-full bg-gradient-to-tr from-sky-400 via-indigo-500 to-indigo-700 active:from-sky-500 active:to-indigo-800 active:scale-90 flex items-center justify-center text-white text-2xl shadow-xl shadow-indigo-500/20 transition select-none no-double-tap">
+                    <i class="fa-solid fa-chevron-up"></i>
+                </button>
             </div>
-
-            <!-- Mobile Controls - Active only on smaller viewports and when mobileMode is set -->
-            <div id="mobileControlsContainer" class="absolute bottom-6 left-6 right-6 z-20 flex justify-between items-center lg:hidden pointer-events-none transition duration-300">
-                <!-- Move controls (Left/Right) -->
-                <div class="flex gap-4 pointer-events-auto">
-                    <button id="btnLeft" class="w-16 h-16 rounded-full bg-slate-950/80 backdrop-blur border-2 border-cyan-400/30 active:border-cyan-400 active:bg-cyan-500/20 active:scale-90 flex items-center justify-center text-cyan-400 text-2xl transition touch-none">
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                    <button id="btnRight" class="w-16 h-16 rounded-full bg-slate-950/80 backdrop-blur border-2 border-cyan-400/30 active:border-cyan-400 active:bg-cyan-500/20 active:scale-90 flex items-center justify-center text-cyan-400 text-2xl transition touch-none">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
-                </div>
-                <!-- Action controls (Jump) -->
-                <div class="flex gap-4 pointer-events-auto">
-                    <button id="btnJump" class="w-18 h-18 rounded-full bg-gradient-to-tr from-cyan-500 to-purple-600 active:from-cyan-400 active:to-purple-500 border border-white/20 active:scale-90 flex items-center justify-center text-white text-2xl shadow-lg shadow-cyan-500/20 transition touch-none">
-                        <i class="fa-solid fa-arrow-up"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Collapsible Mobile Sensors Drawer (Log & Memories Drawer for mobile users) -->
-            <div id="mobileSensorsDrawer" class="absolute top-16 right-4 left-4 glass-panel p-4 rounded-xl border border-cyan-500/30 z-20 hidden lg:hidden max-h-[300px] overflow-y-auto text-right">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
-                    <button onclick="toggleMobileSensorsDrawer()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                    <span class="text-xs font-bold text-cyan-400">سجل حواس نور والذكريات</span>
-                </div>
-                <div class="space-y-3">
-                    <div class="p-2.5 bg-slate-900/60 rounded-lg">
-                        <span class="text-[9px] text-cyan-400 block tracking-widest font-mono">MEMORIES</span>
-                        <div id="mobileMemoriesContainer" class="text-[10px] text-slate-300 mt-1">لا يوجد شظايا بعد.</div>
-                    </div>
-                    <div class="p-2.5 bg-slate-900/60 rounded-lg font-mono">
-                        <span class="text-[9px] text-cyan-400 block tracking-widest font-mono">LOG CONSOLE</span>
-                        <div id="mobileThoughtLogs" class="text-[9px] text-slate-400 mt-1 max-h-[100px] overflow-y-auto space-y-1"></div>
-                    </div>
-                </div>
-            </div>
-
-        </section>
+        </div>
     </main>
 
     <script>
+        // Setup Sound & Synthesizer via Tone.js
+        let synth;
+        let isSoundEnabled = true;
+
+        function initAudio() {
+            if (!synth) {
+                synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                synth.set({
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.05, decay: 0.1, sustain: 0.2, release: 0.6 }
+                });
+            }
+        }
+
+        function playSound(type) {
+            if (!isSoundEnabled) return;
+            initAudio();
+            try {
+                if (type === 'jump') {
+                    synth.triggerAttackRelease("D4", "16n");
+                } else if (type === 'collect') {
+                    synth.triggerAttackRelease("G4", "16n");
+                    setTimeout(() => synth.triggerAttackRelease("C5", "8n"), 50);
+                } else if (type === 'damage') {
+                    synth.triggerAttackRelease("B2", "8n");
+                } else if (type === 'choice') {
+                    synth.triggerAttackRelease("E4", "8n");
+                } else if (type === 'victory') {
+                    synth.triggerAttackRelease("C4", "8n");
+                    setTimeout(() => synth.triggerAttackRelease("E4", "8n"), 80);
+                    setTimeout(() => synth.triggerAttackRelease("G4", "8n"), 160);
+                    setTimeout(() => synth.triggerAttackRelease("C5", "4n"), 240);
+                }
+            } catch (e) {
+                console.log("Audio trigger error:", e);
+            }
+        }
+
+        function toggleSound() {
+            isSoundEnabled = !isSoundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (isSoundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-sky-400';
+                text.innerText = 'الصوت مفعّل';
+                Tone.start();
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+                text.innerText = 'تم كتمه';
+            }
+        }
+
+        // Live Log Updates
+        function logMessage(text, type = 'info') {
+            const consoleBox = document.getElementById('logConsole');
+            const mobileConsoleBox = document.getElementById('mobileLogConsole');
+            const entry = document.createElement('div');
+            let color = 'text-slate-400';
+            if (type === 'success') color = 'text-emerald-400 font-bold';
+            if (type === 'error') color = 'text-rose-400 font-bold animate-pulse';
+            if (type === 'system') color = 'text-sky-300';
+            
+            entry.className = color;
+            entry.innerHTML = `> ${text}`;
+            
+            if (consoleBox) {
+                consoleBox.appendChild(entry.cloneNode(true));
+                consoleBox.scrollTop = consoleBox.scrollHeight;
+            }
+            if (mobileConsoleBox) {
+                mobileConsoleBox.appendChild(entry);
+                mobileConsoleBox.scrollTop = mobileConsoleBox.scrollHeight;
+            }
+        }
+
+        // Floating Mobile Panel Toggles
+        function openSensoryOverlay() {
+            document.getElementById('mobileSensoryOverlay').classList.remove('hidden');
+        }
+        function closeSensoryOverlay() {
+            document.getElementById('mobileSensoryOverlay').classList.add('hidden');
+        }
+
+        // Dynamic viewport scale & Canvas setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
+        const WORLD_WIDTH = 800;
+        let WORLD_HEIGHT = 2200;
         let cameraY = 0;
-        let isMobilePlayMode = true; // Enabled by default for great mobile performance
 
+        // Mobile scaling logic
         function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        // Game Configuration & States
         let isPlaying = false;
         let isGameOver = false;
-        let animationFrameId = null;
-
-        // Player Trust, Stress index, Level Progression status
-        let trust = 80; 
-        let stress = 20; 
-        let collectedFragments = []; 
-        let accessLevel = 1; 
-        let currentSelectedLevel = null;
-        let activeDifficulty = 'medium';
-
-        // Stage list (Chapter 1 to Chapter 4)
-        const levelsDatabase = {
-            1: { title: "الدخول إلى النظام (Login)", chapter: "الفصل الأول", desc: "تدخل نور لوحة التحكم لأول مرة لاسترجاع السجلات الرقمية التائهة.", goalText: "جمع ٣ شظايا ذكريات (Memory Files)", goalType: "collect", target: 3, height: 2200 },
-            2: { title: "فيض المهام المتراكمة (Task Overflow)", chapter: "الفصل الأول", desc: "تغمر الشاشة آلاف الإشعارات والطلبات المتساقطة، ويجب على نور تنظيمها.", goalText: "جمع ٥ بطاقات عمليات وتنظيم المهام", goalType: "collect", target: 5, height: 2600 },
-            3: { title: "خطأ حرج (Error Cascade)", chapter: "الفصل الأول", desc: "أول خلل عملاق يهدد النظام بالانهيار الكلي. تسلق والتحق بمركز الخطأ.", goalText: "تجاوز كابوس الـ Error Cascade بالكامل", goalType: "boss", target: 1, height: 2400 },
-            
-            4: { title: "إدارة الفريق (Team Management)", chapter: "الفصل الثاني", desc: "يطلب الفريق دعمك بشكل مستمر؛ هل تساعدهم أم تنقذ مهامك الفردية؟", goalText: "إكمال متطلبات دعم فريق العمل والحديث معهم", goalType: "npc", target: 2, height: 2800 },
-            5: { title: "الاجتماعات التنفيذية (Meetings)", chapter: "الفصل الثاني", desc: "مفاوضات قرارات صعبة أمام مدراء الأقسام وتحديد الاتجاه التقني.", goalText: "إكمال المفاوضات مع المدراء التنفيذيين (٢)", goalType: "npc", target: 2, height: 2600 },
-            6: { title: "الاحتراق النفسي (Burnout)", chapter: "الفصل الثاني", desc: "تشويش بصري وثقل في الحركة. واجه ملف Burnout.exe للتوازن.", goalText: "تحييد وتجاوز وحش Burnout.exe المتساقط", goalType: "boss", target: 1, height: 2800 },
-            
-            7: { title: "المقاييس الزائفة (False Metrics)", chapter: "الفصل الثالث", desc: "تلاعب ببعض المؤشرات لعرضها باللون الأخضر. ميز الحقيقة من التزوير.", goalText: "جمع شفرتي الحقيقة وتجنب منصات المؤشرات الزائفة", goalType: "collect", target: 2, height: 3200 },
-            8: { title: "صراع الأقسام (Conflict)", chapter: "الفصل الثالث", desc: "اصطدام خوادم الأقسام بسبب النفوذ والميزانيات. حافظ على سلامة البيانات.", goalText: "تجميع ٣ حزم التوافق التقني", goalType: "collect", target: 3, height: 3000 },
-            9: { title: "الحقيقة المطلقة (The Truth)", chapter: "الفصل الثالث", desc: "النواة تكشف حقيقة النظام المصمم لاستهلاك البشر نفسياً. واجه النواة.", goalText: "إسقاط وتصفير طاقة خادم الضغط Core Pressure Engine", goalType: "boss", target: 1, height: 3400 },
-            
-            10: { title: "الصمت المطبق (Silence Room)", chapter: "الفصل الرابع", desc: "أعلى نقطة بالداشبورد. صمت تام ونقي وكرسي قيادة خالٍ من الأوامر.", goalText: "صعود الكرسي واتخاذ خيارك الوجداني النهائي", goalType: "summit", target: 1, height: 2000 }
+        let isPaused = false;
+        let currentLevel = 1;
+        let maxUnlockedLevel = parseInt(localStorage.getItem('noor_unlocked_level') || '1');
+        let currentDifficulty = 'medium'; // 'easy' (stable), 'medium' (stressed), 'hard' (critical)
+        
+        // Physics constants relative to Difficulty
+        let difficultySettings = {
+            easy: { platformGap: 85, platformWidth: 160, gravity: 0.35, maxStress: 100 },
+            medium: { platformGap: 105, platformWidth: 125, gravity: 0.38, maxStress: 100 },
+            hard: { platformGap: 125, platformWidth: 95, gravity: 0.40, maxStress: 100 }
         };
 
-        const WORLD_WIDTH = 800;
-        let WORLD_HEIGHT = 2200;
+        // Psychological Variables
+        let stressIndex = 20; // Starts from 20%
+        let truthFragmentsCollected = 0;
+        let memoryFragmentsCollected = 0;
+        let objectivesFulfilled = false;
 
+        // Level Database
+        const STAGE_DATABASE = {
+            1: {
+                title: "المستوى 1 — تسجيل الدخول (Login)",
+                desc: "نور تدخل لوحة تحكم المنصة الوطنية لأول مرة. المنصات قريبة وسهلة لتعليم التحكم ومساندة الوعي الذاتي.",
+                height: 2200,
+                objectiveDesc: "جمع 3 شظايا الحقيقة والوصول لقمة الـ SQL",
+                targetTruth: 3,
+                requiredMemories: 0
+            },
+            2: {
+                title: "المستوى 2 — تكدس المهام والطلبات (Task Overflow)",
+                desc: "موجة طلبات عارمة تضرب الخوادم. الجاذبية منخفضة ورياح عاصفة تهب لتعيق صعودك واستقرارك حركياً.",
+                height: 2800,
+                objectiveDesc: "موازنة الخادم وجمع 5 حزم توازن الشبكة السحابية",
+                targetTruth: 5,
+                requiredMemories: 0
+            },
+            3: {
+                title: "المستوى 3 — الخطأ الحرج الأول (Error Cascade)",
+                desc: "انهيار تدريجي للنواة. تنهار المنصات غير المستقرة (KPIs) بمجرد ملامستها. احترس من الانهيار البرمجي الكاذب.",
+                height: 3200,
+                objectiveDesc: "تجنب الأخطاء البرمجية الهابطة وحل 5 تحليلات معطوبة",
+                targetTruth: 5,
+                requiredMemories: 1
+            },
+            4: {
+                title: "المستوى 4 — إدارة الفريق والضغط (Team Management)",
+                desc: "الزملاء يطلبون المساعدة. ساعد الموظفين في طريقك لبناء الثقة وتجنب الاحتراق النفسي المتزايد.",
+                height: 3500,
+                objectiveDesc: "مساعدة 3 مبرمجين (NPCs) وصعود قمة العمليات المشتركة",
+                targetTruth: 3,
+                requiredMemories: 2
+            },
+            5: {
+                title: "المستوى 5 — الاجتماعات التنفيذية (Executive Meetings)",
+                desc: "التفاوض مع مجلس الإدارة. بوابات نقل النواة نشطة. واجه أعضاء الإدارة برؤية حكيمة لحماية فريقك.",
+                height: 3800,
+                objectiveDesc: "التفاعل واتخاذ القرارات مع عضوين تنفيذييْن بمجلس الإدارة",
+                targetTruth: 2,
+                requiredMemories: 2
+            }
+        };
+
+        // Noor / Player object physics
         let player = {
-            x: 400,
-            y: WORLD_HEIGHT - 120,
+            x: WORLD_WIDTH / 2,
+            y: 0,
+            width: 32,
+            height: 32,
             vx: 0,
             vy: 0,
-            width: 24,
-            height: 38,
-            speed: 5.2,
-            gravity: 0.35,
             isGrounded: false,
-            jumpForce: -11.5,
-            color: '#22d3ee',
-            animFrame: 0,
+            doubleJumpAvailable: true,
             dir: 'left',
-            faceState: 'normal' // normal, happy, falling, sad
+            glow: 15,
+            glowDir: 1
         };
 
-        // Input state trackers
+        // Virtual Touch Keyboard / Mobile controls inputs
         let keys = {};
         let touchLeft = false;
         let touchRight = false;
         let touchJump = false;
 
-        // Interactive Stage entities
+        // Dynamic Level Game Arrays
         let platforms = [];
         let items = [];
-        let particles = [];
-        let textDecors = [];
-        let enemies = [];
-        let bossEntities = [];
-        let dialogTriggered = {};
+        let npcs = [];
+        let projectiles = [];
+        let bgSymbols = [];
 
-        // Track objectives metrics in active game
-        let levelGoalCollected = 0;
-        let levelBossDefeated = false;
+        // Active Dialogue parameters
+        let activeDialogue = null;
 
-        // Custom dialogue storage
-        const activeDialogues = {
-            1: {
-                triggerY: 1500,
-                speaker: "نـور",
-                subtitle: "operations leader",
-                text: "الجميع ينتظر لوحة البيانات الوطنية الموحدة. أطلقت خوادم الرصد، وبدأت المؤشرات بالعمل. يجب أن أنجز هذا مشروع بنجاح 100%.. لا مجال لأي عطل اليوم.",
-                options: [
-                    { text: "أنا مستعدة لكل المسؤوليات (زيادة طموح)", stressEffect: 10, trustEffect: 0, log: "صممت نور على صعود النظام بكل قوتها." },
-                    { text: "أشعر ببعض الثقل، ولكن سأتحمل (ضغط نفسي خفيف)", stressEffect: 5, trustEffect: 5, log: "اعترفت نور بثقل المسؤولية، مقدرة لسلامتها." }
-                ]
-            },
-            2: {
-                triggerY: 1200,
-                speaker: "صديق من الفريق (خالد)",
-                subtitle: "Data Engineer",
-                text: "أهلاً يا م. نور.. لدينا تكرار كبير في قواعد البيانات ومصادقة SQL، هل يمكنك المساعدة في إعادة هيكلة النطاق فوراً؟ نحن في ذروة اليوم الوطني والطلبات بالملايين!",
-                options: [
-                    { text: "سأتكفل بكل شيء بنفسي، اذهب للراحة (+20 ضغط نفسي)", stressEffect: 20, trustEffect: 30, log: "اختارت نور تحمل العبء بمفردها لتكسب ثقة الجميع." },
-                    { text: "قوموا بتقسيم المهام وتجاوزوا التكرار معاً (-10 ضغط نفسي)", stressEffect: -10, trustEffect: -10, log: "فضلت نور تشارك المسؤولية لحماية صحتها النفسية." }
-                ]
-            },
-            3: {
-                triggerY: 1300,
-                speaker: "مكالمة إدارية (الرئيس التنفيذي)",
-                subtitle: "Executive Core Leader",
-                text: "مرحباً يا نور. نرى تقارير الانخفاض في مصادقة الـ KYC. أطلب منك تزيين مؤشرات الأداء (KPIs) لتظهر باللون الأخضر في اجتماع مجلس الإدارة القادم. الجميع يراقبنا.",
-                options: [
-                    { text: "سأقوم بتزيين الأرقام وتغيير المؤشرات لإرضاء الرئيس (حماية مؤقتة)", stressEffect: 15, trustEffect: -15, log: "قررت نور تزوير التقارير لتفادي النقد الإداري الشديد." },
-                    { text: "سأعرض الحقائق المجرّدة حتى لو غضب الجميع (البحث عن الحقيقة)", stressEffect: 30, trustEffect: 20, log: "صمدت نور أمام الضغط التنفيذي لعرض المشاكل الحقيقية." }
-                ]
-            }
-        };
-
-        // Setup Tone.js dynamic synth engine
-        let backTrack = null;
-        let noteInterval = null;
-        let isSynthInit = false;
-
-        function initSynth() {
-            if (isSynthInit) return;
-            try {
-                backTrack = new Tone.Synth({
-                    oscillator: { type: "sine" },
-                    envelope: { attack: 0.12, decay: 0.1, sustain: 0.4, release: 0.8 }
-                }).toDestination();
-                
-                let noteIndex = 0;
-                noteInterval = setInterval(() => {
-                    if (!isPlaying || isGameOver || Tone.getDestination().mute) return;
-                    
-                    let scale = ["C3", "G3", "C4", "E4", "G4"];
-                    if (stress > 45) scale = ["C3", "Eb3", "Ab3", "C4", "Eb4"]; 
-                    if (stress > 70) scale = ["C#3", "G3", "Ab3", "D4", "F4"]; 
-                    
-                    if (currentSelectedLevel === 10) return; // Silent summit
-
-                    let note = scale[noteIndex % scale.length];
-                    let synthDetune = (stress - 20) * 1.5;
-                    backTrack.set({ detune: synthDetune });
-                    
-                    backTrack.triggerAttackRelease(note, "4n", undefined, 0.15);
-                    noteIndex++;
-                }, 1000);
-
-                isSynthInit = true;
-            } catch(e) {
-                console.warn("Tone.js could not initiate synthesizers.", e);
-            }
-        }
-
-        function toggleAudio() {
-            const btn = document.getElementById('audioIcon');
-            if (Tone.context.state !== 'running') {
-                Tone.start();
-            }
-            initSynth();
-
-            Tone.getDestination().mute = !Tone.getDestination().mute;
-
-            if (Tone.getDestination().mute) {
-                btn.className = "fa-solid fa-volume-mute text-slate-400";
+        // Toggle mobile control layouts on click
+        let mobileControlsActive = false;
+        function toggleMobileControlsMode() {
+            mobileControlsActive = !mobileControlsActive;
+            const ctrl = document.getElementById('mobileController');
+            const toggleBtn = document.getElementById('mobileModeToggle');
+            if (mobileControlsActive) {
+                ctrl.classList.remove('hidden');
+                toggleBtn.innerText = "تعطيل وضع الجوال";
+                toggleBtn.className = "px-4 py-2 bg-sky-950 hover:bg-sky-900 border border-sky-600 rounded-lg text-xs font-bold text-sky-400 no-double-tap";
             } else {
-                btn.className = "fa-solid fa-volume-high text-cyan-400";
-                addThoughtLog("تم تفريغ النبضات السيكولوجية للمؤشر التفاعلي.");
+                ctrl.classList.add('hidden');
+                toggleBtn.innerText = "تمكين وضع الجوال";
+                toggleBtn.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-slate-400 no-double-tap";
             }
         }
 
-        // Render progression grid mapping
-        function renderProgressGrid() {
-            const grid = document.getElementById('stagesGrid');
-            if (!grid) return;
-            grid.innerHTML = "";
-
-            const unlocked = parseInt(localStorage.getItem('noor_unlocked_level') || '1');
-
-            for (let i = 1; i <= 10; i++) {
-                const lvl = levelsDatabase[i];
-                const isUnlocked = i <= unlocked;
+        // Render Stage Maps in Settings Menu
+        function buildStagesMapUI() {
+            const grid = document.getElementById('stagesMapGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const stage = STAGE_DATABASE[i];
+                const isUnlocked = i <= maxUnlockedLevel;
+                const activeClass = i === currentLevel ? 'border-sky-500 bg-sky-950/40 text-sky-300' : 'border-slate-800 bg-slate-950/40 text-slate-400';
                 
-                const card = document.createElement('button');
-                card.className = `level-node p-2 md:p-3 rounded-xl border flex flex-col items-center justify-center text-center transition ${
-                    isUnlocked 
-                        ? 'border-cyan-500/30 bg-slate-900/60 hover:bg-slate-800/80 unlocked' 
-                        : 'border-slate-800 bg-slate-950/40 opacity-50 cursor-not-allowed'
-                } ${currentSelectedLevel === i ? 'border-cyan-400 bg-slate-900/90 shadow-lg shadow-cyan-400/10' : ''}`;
+                const btn = document.createElement('button');
+                btn.className = `p-2.5 rounded-xl border text-right transition no-double-tap flex flex-col justify-between h-20 ${activeClass} ${!isUnlocked ? 'opacity-50 cursor-not-allowed' : 'hover:border-sky-400'}`;
+                btn.onclick = () => {
+                    if (isUnlocked) {
+                        selectStage(i);
+                    }
+                };
                 
-                card.disabled = !isUnlocked;
-                card.onclick = () => selectLevel(i);
-
-                card.innerHTML = `
-                    <span class="text-[8px] md:text-[9px] text-slate-500 font-mono">${lvl.chapter}</span>
-                    <h5 class="text-[10px] md:text-xs font-bold text-slate-200 mt-0.5">${lvl.title.split(" ")[0]}</h5>
-                    <div class="mt-1 text-sm">
-                        ${isUnlocked ? '<i class="fa-solid fa-folder-open text-cyan-400 text-xs md:text-sm"></i>' : '<i class="fa-solid fa-lock text-slate-600 text-xs md:text-sm"></i>'}
+                btn.innerHTML = `
+                    <div class="flex justify-between items-center w-full">
+                        <span class="text-[10px] font-bold">فصل ${i}</span>
+                        <span>${isUnlocked ? '🔓' : '🔒'}</span>
                     </div>
+                    <span class="text-[9px] block truncate font-bold">${stage.title.split('—')[1]}</span>
                 `;
-                grid.appendChild(card);
+                grid.appendChild(btn);
             }
-        }
-
-        function selectLevel(idx) {
-            currentSelectedLevel = idx;
-            renderProgressGrid();
-
-            const lvl = levelsDatabase[idx];
-            const widget = document.getElementById('selectedStageWidget');
-            widget.classList.remove('hidden');
-
-            document.getElementById('widgetSub').innerText = `${lvl.chapter} - STAGE ${idx}`;
-            document.getElementById('widgetTitle').innerText = lvl.title;
-            document.getElementById('widgetDesc').innerText = lvl.desc;
-            document.getElementById('widgetGoal').innerText = lvl.goalText;
-
-            const launchBtn = document.getElementById('btnLaunch');
-            launchBtn.disabled = false;
-            launchBtn.innerText = "تشغيل النظم وبدء الصعود 🚀";
         }
 
         function setDifficulty(diff) {
-            activeDifficulty = diff;
-            document.getElementById('diffEasy').className = "py-2 rounded-xl border text-[10px] md:text-xs font-bold transition " + (diff === 'easy' ? 'border-emerald-500 bg-emerald-500/15 text-emerald-400 shadow-md shadow-emerald-500/10' : 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400');
-            document.getElementById('diffMedium').className = "py-2 rounded-xl border text-[10px] md:text-xs font-bold transition " + (diff === 'medium' ? 'border-cyan-400 bg-cyan-400/15 text-cyan-400 shadow-md shadow-cyan-400/10' : 'border-cyan-400/20 bg-cyan-400/5 text-cyan-400');
-            document.getElementById('diffHard').className = "py-2 rounded-xl border text-[10px] md:text-xs font-bold transition " + (diff === 'hard' ? 'border-rose-500 bg-rose-500/15 text-rose-400 shadow-md shadow-rose-500/10' : 'border-rose-500/20 bg-rose-500/5 text-rose-400');
+            currentDifficulty = diff;
+            ['easy', 'medium', 'hard'].forEach(d => {
+                const btn = document.getElementById(`diffBtn_${d}`);
+                if (d === diff) {
+                    btn.className = "py-2 px-3 rounded-xl text-xs font-bold transition border border-sky-400 bg-sky-950/60 text-sky-300 no-double-tap";
+                } else {
+                    btn.className = "py-2 px-3 rounded-xl text-xs font-bold transition border border-slate-800 bg-slate-950/40 text-slate-400 no-double-tap";
+                }
+            });
+            logMessage(`تم ضبط معيار ضغط العمل إلى: ${diff === 'easy' ? 'مستقر' : diff === 'medium' ? 'مضغوط' : 'حرج'}`, 'system');
         }
 
-        // Toggle Mobile Mode Settings
-        function toggleMobilePlayMode() {
-            isMobilePlayMode = !isMobilePlayMode;
-            const btn = document.getElementById('mobileModeToggle');
-            const controls = document.getElementById('mobileControlsContainer');
-            
-            if (isMobilePlayMode) {
-                btn.className = "px-4 py-1.5 rounded-lg text-[10px] font-bold border transition duration-300 bg-cyan-500/20 text-cyan-300 border-cyan-400/40";
-                btn.innerText = "مفعّل";
-                controls.classList.remove('hidden');
-                addThoughtLog("تمت تهيئة اللعبة وتكبير الأزرار لراحة اليد.");
+        function selectStage(stg) {
+            currentLevel = stg;
+            buildStagesMapUI();
+            logMessage(`تم توجيه خادم البيانات للمرحلة رقم: ${stg}`, 'system');
+        }
+
+        function togglePauseMenu() {
+            const overlay = document.getElementById('pauseMenuOverlay');
+            isPaused = !isPaused;
+            if (isPaused) {
+                overlay.classList.remove('hidden');
+                buildStagesMapUI();
             } else {
-                btn.className = "px-4 py-1.5 rounded-lg text-[10px] font-bold border transition duration-300 bg-slate-800 text-slate-400 border-slate-700";
-                btn.innerText = "معطّل";
-                controls.classList.add('hidden');
-                addThoughtLog("تم تحويل التحكم إلى لوحة المفاتيح والأسهم.");
+                overlay.classList.add('hidden');
             }
         }
 
-        function toggleMobileSensorsDrawer() {
-            const drawer = document.getElementById('mobileSensorsDrawer');
-            drawer.classList.toggle('hidden');
+        function closePauseMenu() {
+            isPaused = false;
+            document.getElementById('pauseMenuOverlay').classList.add('hidden');
+            initLevel();
         }
 
-        function buildDashboardSector() {
-            platforms = [];
-            items = [];
-            enemies = [];
-            particles = [];
-            textDecors = [];
-            bossEntities = [];
-            dialogTriggered = {};
-
-            const lvlData = levelsDatabase[currentSelectedLevel];
-            WORLD_HEIGHT = lvlData.height;
-            cameraY = WORLD_HEIGHT - 600;
-
-            // Player starting coordinates
-            player.x = 400;
+        // Stage & Objectives Initialization
+        function initLevel() {
+            const config = STAGE_DATABASE[currentLevel];
+            WORLD_HEIGHT = config.height;
+            cameraY = WORLD_HEIGHT - canvas.height;
+            
+            // Set Player start parameters
+            player.x = WORLD_WIDTH / 2;
             player.y = WORLD_HEIGHT - 120;
             player.vx = 0;
             player.vy = 0;
+            player.isGrounded = false;
+            
+            stressIndex = 20;
+            truthFragmentsCollected = 0;
+            memoryFragmentsCollected = 0;
+            objectivesFulfilled = false;
 
-            // Adjust physics and gaps based on difficulty to ensure all platforms are easily reachable
-            let spacingOffset = 0;
-            let verticalGapMin = 85;
-            let verticalGapMax = 105;
+            // Generate Map objects
+            buildDashboardSector();
+            updateHUD();
 
-            if (activeDifficulty === 'easy') {
-                spacingOffset = -25;
-                verticalGapMin = 75;
-                verticalGapMax = 95;
-                player.speed = 5.6;
-            } else if (activeDifficulty === 'hard') {
-                spacingOffset = 20;
-                verticalGapMin = 95;
-                verticalGapMax = 115;
-                player.speed = 4.8;
-            } else { // medium
-                spacingOffset = 0;
-                verticalGapMin = 85;
-                verticalGapMax = 105;
-                player.speed = 5.2;
-            }
+            isPlaying = true;
+            isGameOver = false;
 
-            // Create solid landing floor platform
-            platforms.push({ x: 0, y: WORLD_HEIGHT - 40, width: WORLD_WIDTH, height: 40, type: 'base', color: '#111827' });
+            logMessage(`بدء عملية معالجة: ${config.title}`, 'system');
+        }
 
-            // Generate beautifully connected platforms with dynamic spacing
-            let currentPlatY = WORLD_HEIGHT - 180;
-            let currentPlatX = 400;
-            let counter = 0;
+        // Chained Platform Generation algorithm for zero gap faults!
+        function buildDashboardSector() {
+            platforms = [];
+            items = [];
+            npcs = [];
+            projectiles = [];
+            bgSymbols = [];
 
-            while (currentPlatY > 150) {
-                let platW = Math.max(100, 150 - (currentSelectedLevel * 3));
-                // Making horizontal steps smaller so players don't miss sideways
-                let stepX = 85 + spacingOffset + Math.random() * 45;
-                let dir = Math.random() > 0.5 ? 1 : -1;
+            const diff = difficultySettings[currentDifficulty];
+            const config = STAGE_DATABASE[currentLevel];
+
+            // 1. Build Secure Base Floor
+            platforms.push({
+                x: 0,
+                y: WORLD_HEIGHT - 40,
+                width: WORLD_WIDTH,
+                height: 40,
+                type: 'base',
+                title: 'قاعدة البيانات المستقرة (SQL Host Base)'
+            });
+
+            // 2. Proportional Chained Generation Loop
+            let currentY = WORLD_HEIGHT - 120;
+            let lastX = WORLD_WIDTH / 2;
+
+            const platformTypes = ['bar_chart', 'kpi_gauge', 'workflow_card', 'progress_bar'];
+            const labels = ["معدل النمو", "قيمة الأرباح", "حركة المرور IP", "ذاكرة التخزين Cache", "اتصال API"];
+
+            while (currentY > 160) {
+                // Determine horizontal X based on proximity constraints
+                let width = diff.platformWidth;
+                let minX = Math.max(50, lastX - 160);
+                let maxX = Math.min(WORLD_WIDTH - width - 50, lastX + 160);
+                let x = Math.floor(Math.random() * (maxX - minX)) + minX;
                 
-                currentPlatX += dir * stepX;
-                if (currentPlatX < 100) currentPlatX = 150 + Math.random() * 50;
-                if (currentPlatX + platW > WORLD_WIDTH - 100) currentPlatX = WORLD_WIDTH - 250 - Math.random() * 50;
-
-                let platformType = 'normal';
-                let platCol = 'rgba(34, 211, 238, 0.85)'; // Default blue cyan
-
-                if (currentSelectedLevel >= 4 && currentSelectedLevel <= 6) {
-                    platCol = 'rgba(168, 85, 247, 0.85)'; // Purple neon
-                } else if (currentSelectedLevel >= 7 && currentSelectedLevel <= 9) {
-                    platCol = 'rgba(245, 158, 11, 0.85)'; // Orange/gold metrics
-                    if (Math.random() > 0.7 && currentPlatY < WORLD_HEIGHT - 600) {
-                        platformType = 'fake_kpi';
-                        platCol = 'rgba(239, 68, 68, 0.85)'; // Collapsing Fake KPI
-                    }
-                }
+                let type = platformTypes[Math.floor(Math.random() * platformTypes.length)];
+                let title = labels[Math.floor(Math.random() * labels.length)] + " #" + Math.floor(currentY/10);
 
                 platforms.push({
-                    x: currentPlatX,
-                    y: currentPlatY,
-                    width: platW,
-                    height: 20,
-                    type: platformType,
-                    color: platCol,
-                    pulse: Math.random() * 5,
-                    touched: false,
-                    decayTimer: 45
+                    x: x,
+                    y: currentY,
+                    width: width,
+                    height: 22,
+                    type: type,
+                    title: title,
+                    isMoving: (Math.random() > 0.5 && currentY < WORLD_HEIGHT - 400),
+                    moveSpeed: Math.random() * 1.5 + 0.5,
+                    dir: Math.random() > 0.5 ? 1 : -1,
+                    rangeX: [Math.max(20, x - 120), Math.min(WORLD_WIDTH - width - 20, x + 120)]
                 });
 
-                // Spawning task items and target assets
-                if (lvlData.goalType === 'collect' && Math.random() > 0.4) {
+                // Spawn Truth/Objective Tokens on platforms
+                if (Math.random() > 0.4) {
                     items.push({
-                        x: currentPlatX + platW / 2,
-                        y: currentPlatY - 24,
+                        x: x + width/2,
+                        y: currentY - 24,
                         width: 14,
                         height: 14,
-                        type: 'data_fragment',
+                        type: 'truth_fragment',
                         pulse: Math.random() * 10
                     });
                 }
 
-                // Spawning NPCs in specific slots - LEVEL 4 Support Members
-                if (currentSelectedLevel === 4 && (counter === 3 || counter === 8)) {
-                    enemies.push({
-                        x: currentPlatX + 25,
-                        y: currentPlatY - 25,
-                        width: 20,
-                        height: 25,
-                        type: 'team_npc',
-                        helped: false,
-                        msg: counter === 3 ? "خالد يحتاج مساعدة بمصادقة قواعد البيانات" : "سارة تحتاج تقارير النطاق"
+                // Level 4 Special: Generate team programmers to assist
+                if (currentLevel === 4 && Math.random() > 0.7 && npcs.length < 3) {
+                    npcs.push({
+                        x: x + 10,
+                        y: currentY - 32,
+                        width: 24,
+                        height: 32,
+                        type: 'team_member',
+                        name: `مطور #${npcs.length + 1}`,
+                        dialogue: "البرمجة معقدة والمهام تتراكم، هل يمكنك تفويض المهام لمساعدتنا؟",
+                        answered: false
                     });
                 }
 
-                // Spawning NPCs in specific slots - LEVEL 5 Board Executive Members
-                if (currentSelectedLevel === 5 && (counter === 3 || counter === 8)) {
-                    enemies.push({
-                        x: currentPlatX + 25,
-                        y: currentPlatY - 25,
-                        width: 20,
-                        height: 25,
+                // Level 5 Special: Generate Board members in intermediate platforms
+                if (currentLevel === 5 && Math.random() > 0.65 && npcs.length < 2) {
+                    const index = npcs.length;
+                    npcs.push({
+                        x: x + width / 3,
+                        y: currentY - 32,
+                        width: 28,
+                        height: 32,
                         type: 'board_npc',
-                        helped: false,
-                        msg: counter === 3 ? "م. ناصر (رئيس قطاع التشغيل - COO)" : "أ. منيرة (مديرة الموارد البشرية - CHRO)"
+                        name: index === 0 ? "م. ناصر (COO)" : "أ. منيرة (CHRO)",
+                        dialogue: index === 0 ? "نظام نور يحتاج للنشر الفوري اليوم لإرضاء المستثمرين بغض النظر عن الجاهزية!" : "الفريق يعاني من ضغط شديد والروح المعنوية منخفضة للغاية. هل نؤجل الإطلاق؟",
+                        answered: false
                     });
                 }
 
-                // Bring vertical spacing closer to ensure jumps are physically 100% reachable
-                currentPlatY -= (verticalGapMin + Math.random() * (verticalGapMax - verticalGapMin));
-                counter++;
+                lastX = x;
+                currentY -= (Math.random() * 20 + diff.platformGap);
             }
 
-            // Create peak target platform for summit victory
-            platforms.push({ x: WORLD_WIDTH / 2 - 150, y: 110, width: 300, height: 25, type: 'summit', color: '#10b981' });
-
-            // Create end terminal
-            if (currentSelectedLevel === 10) {
-                items.push({ x: WORLD_WIDTH / 2, y: 70, width: 30, height: 40, type: 'reflection_chair', pulse: 0 });
-            } else {
-                items.push({ x: WORLD_WIDTH / 2, y: 80, width: 20, height: 20, type: 'core_terminal', pulse: 0 });
-            }
-
-            // Spawning Boss entities
-            if (currentSelectedLevel === 3) {
-                // Boss Error Cascade
-                bossEntities.push({
-                    x: 400,
-                    y: WORLD_HEIGHT - 650,
-                    width: 90,
-                    height: 90,
-                    health: 100,
-                    maxHealth: 100,
-                    type: 'error_cascade',
-                    pulse: 0,
-                    dir: 1
-                });
-            } else if (currentSelectedLevel === 6) {
-                // Boss Burnout.exe
-                bossEntities.push({
-                    x: 400,
-                    y: WORLD_HEIGHT - 650,
-                    width: 110,
-                    height: 110,
-                    health: 110,
-                    maxHealth: 110,
-                    type: 'burnout_exe',
-                    pulse: 0,
-                    dir: 1
-                });
-            } else if (currentSelectedLevel === 9) {
-                // Boss Core Pressure Engine
-                bossEntities.push({
-                    x: 400,
-                    y: WORLD_HEIGHT - 700,
-                    width: 150,
-                    height: 120,
-                    health: 130,
-                    maxHealth: 130,
-                    type: 'pressure_engine',
-                    pulse: 0,
-                    dir: 1
-                });
-            }
-
-            // Adding scenic decorations
-            textDecors.push({ x: 80, y: WORLD_HEIGHT - 200, text: "LOGIN_INITIALIZATION", color: "rgba(34,211,238,0.12)", size: 14 });
-            textDecors.push({ x: 500, y: WORLD_HEIGHT - 1200, text: "DATA_STRESS_OVERFLOW_METRIC", color: "rgba(34,211,238,0.08)", size: 16 });
-        }
-
-        // Launch the core active system
-        function launchSystem() {
-            if (currentSelectedLevel === null) return;
-            document.getElementById('menuOverlay').classList.add('hidden');
-            document.getElementById('pauseGameBtn').classList.remove('hidden');
-
-            isPlaying = true;
-            isGameOver = false;
-            levelGoalCollected = 0;
-            levelBossDefeated = false;
-
-            // Tone gesture unlock
-            if (Tone.context.state !== 'running') {
-                Tone.start();
-            }
-
-            buildDashboardSector();
-            updateHUDPanel();
-
-            addThoughtLog(`تم تفريغ لوحة التحكم للمرحلة ${currentSelectedLevel}. بدء فحص الحيوية...`);
-
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-            }
-            animationFrameId = requestAnimationFrame(gameLoop);
-        }
-
-        // Return back to Stage Selection HUD
-        function backToControl() {
-            isPlaying = false;
-            isGameOver = true;
-            document.getElementById('endOverlay').classList.add('hidden');
-            document.getElementById('victoryOverlay').classList.add('hidden');
-            document.getElementById('pauseGameBtn').classList.add('hidden');
-            document.getElementById('menuOverlay').classList.remove('hidden');
-
-            renderProgressGrid();
-        }
-
-        function triggerVictory() {
-            isPlaying = false;
-            isGameOver = true;
-
-            const unlocked = parseInt(localStorage.getItem('noor_unlocked_level') || '1');
-            if (currentSelectedLevel === unlocked && unlocked < 10) {
-                localStorage.setItem('noor_unlocked_level', unlocked + 1);
-            }
-
-            document.getElementById('victoryOverlay').classList.remove('hidden');
-            document.getElementById('victoryModalDesc').innerText = `تم صعود وتفريغ متطلبات المرحلة [ ${levelsDatabase[currentSelectedLevel].title} ] بنجاح تام!`;
-
-            const btnNext = document.getElementById('btnNextStage');
-            if (currentSelectedLevel === 10) {
-                btnNext.classList.add('hidden');
-            } else {
-                btnNext.classList.remove('hidden');
-            }
-        }
-
-        function playNextStage() {
-            if (currentSelectedLevel < 10) {
-                currentSelectedLevel++;
-                document.getElementById('victoryOverlay').classList.add('hidden');
-                
-                isPlaying = true;
-                isGameOver = false;
-                levelGoalCollected = 0;
-                levelBossDefeated = false;
-
-                buildDashboardSector();
-                updateHUDPanel();
-
-                addThoughtLog(`الانتقال للمرحلة التالية: ${levelsDatabase[currentSelectedLevel].title}`);
-            }
-        }
-
-        function updateHUDPanel() {
-            const data = levelsDatabase[currentSelectedLevel];
-            document.getElementById('currentChapterTitle').innerText = `${data.chapter}: ${data.title}`;
-            document.getElementById('currentLevelDesc').innerText = data.desc;
-            document.getElementById('hudLevelNum').innerText = `${currentSelectedLevel}/10`;
-            document.getElementById('hudPermit').innerText = `PERMIT LVL ${currentSelectedLevel}`;
-            
-            document.getElementById('hudStress').style.width = `${stress}%`;
-            document.getElementById('hudTrust').style.width = `${trust}%`;
-
-            const container = document.getElementById('memoriesContainer');
-            const mobileContainer = document.getElementById('mobileMemoriesContainer');
-            
-            if (container) {
-                if (collectedFragments.length === 0) {
-                    const emptyHtml = `<p class="italic text-slate-500 text-center text-[10px]">لم يتم استخراج شفرات أو حقيقة بعد.</p>`;
-                    container.innerHTML = emptyHtml;
-                    if (mobileContainer) mobileContainer.innerHTML = emptyHtml;
-                } else {
-                    container.innerHTML = "";
-                    if (mobileContainer) mobileContainer.innerHTML = "";
-
-                    collectedFragments.forEach(frag => {
-                        const itemHtml = `<div class="p-1.5 bg-slate-900/80 rounded border border-cyan-500/20 flex items-center gap-1.5 text-[9px] text-slate-300">
-                            <i class="fa-solid fa-microchip text-cyan-400"></i> <span class="font-bold">${frag}</span>
-                        </div>`;
-                        
-                        container.insertAdjacentHTML('beforeend', itemHtml);
-                        if (mobileContainer) mobileContainer.insertAdjacentHTML('beforeend', itemHtml);
-                    });
-                }
-            }
-        }
-
-        // Play choices sensory dialogue trigger
-        function triggerDialogue(key) {
-            if (dialogTriggered[key]) return;
-            dialogTriggered[key] = true;
-            
-            const dialog = activeDialogues[key];
-            if (!dialog) return;
-
-            isPlaying = false; // Pause active loops
-            
-            document.getElementById('speakerName').innerText = dialog.speaker;
-            document.getElementById('speakerSubtitle').innerText = dialog.subtitle;
-            document.getElementById('narrativeText').innerText = dialog.text;
-            
-            const optionsDiv = document.getElementById('dialogueOptions');
-            optionsDiv.innerHTML = "";
-            
-            dialog.options.forEach((opt) => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400/50 bg-slate-900/60 hover:bg-slate-800/80 transition text-xs leading-relaxed";
-                btn.innerText = opt.text;
-                btn.onclick = () => {
-                    stress = Math.max(0, Math.min(100, stress + opt.stressEffect));
-                    trust = Math.max(0, Math.min(100, trust + opt.trustEffect));
-                    
-                    if (opt.log) addThoughtLog(opt.log);
-                    if (currentSelectedLevel === 4) levelGoalCollected++; // NPC dialogues count for Level 4
-                    
-                    document.getElementById('hudStress').style.width = `${stress}%`;
-                    document.getElementById('hudTrust').style.width = `${trust}%`;
-                    
-                    // Resume game loop safely
-                    document.getElementById('narrativeOverlay').classList.add('hidden');
-                    updateHUDPanel();
-                    isPlaying = true;
-                };
-                optionsDiv.appendChild(btn);
+            // 3. Build Executive Summit core platform
+            platforms.push({
+                x: WORLD_WIDTH / 2 - 120,
+                y: 110,
+                width: 240,
+                height: 30,
+                type: 'summit',
+                title: 'النواة الرئيسية لمجلس الإدارة'
             });
-            
-            document.getElementById('narrativeOverlay').classList.remove('hidden');
-        }
 
-        function triggerTeamHelpDialogue(npc) {
-            isPlaying = false;
-            document.getElementById('speakerName').innerText = npc.msg;
-            document.getElementById('speakerSubtitle').innerText = "طلب دعم من الفريق";
-            document.getElementById('narrativeText').innerText = "مرحبا م. نور، أواجه ضغطًا كبيرًا في إعداد لوحة البيانات الحالية. هل يمكنك تخصيص بعض من وقتك لمساعدتي؟";
-            
-            const optionsDiv = document.getElementById('dialogueOptions');
-            optionsDiv.innerHTML = "";
-
-            const opt1 = document.createElement('button');
-            opt1.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs";
-            opt1.innerText = "سأقضي ٣ ساعات في حل مشكلتك فوراً (زيادة ثقة الفريق ولكن زيادة إرهاق)";
-            opt1.onclick = () => {
-                stress = Math.min(100, stress + 15);
-                trust = Math.min(100, trust + 20);
-                levelGoalCollected++;
-                addThoughtLog("قمت بإنقاذ زميلك، زادت ثقته بك ولكن الوقت يضيق.");
-                resumeAndClose();
-            };
-
-            const opt2 = document.createElement('button');
-            opt2.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs";
-            opt2.innerText = "أعتذر منك بشدة، أحتاج التركيز في ترحيل النواة الآن (تقليص الثقة)";
-            opt2.onclick = () => {
-                trust = Math.max(0, trust - 15);
-                levelGoalCollected++;
-                addThoughtLog("تجاهلت المشكلة، فريق العمل يبدو منعزلاً ومحبطاً.");
-                resumeAndClose();
-            };
-
-            optionsDiv.appendChild(opt1);
-            optionsDiv.appendChild(opt2);
-            document.getElementById('narrativeOverlay').classList.remove('hidden');
-
-            function resumeAndClose() {
-                document.getElementById('narrativeOverlay').classList.add('hidden');
-                updateHUDPanel();
-                isPlaying = true;
+            // 4. Fill cinematic cyber symbols
+            for (let i = 0; i < 40; i++) {
+                bgSymbols.push({
+                    x: Math.random() * WORLD_WIDTH,
+                    y: Math.random() * WORLD_HEIGHT,
+                    char: Math.random() > 0.5 ? '0' : '1',
+                    alpha: Math.random() * 0.2 + 0.05,
+                    speed: Math.random() * 0.6 + 0.1
+                });
             }
         }
 
-        function triggerExecutiveMeetingDialogue(npc) {
-            isPlaying = false;
-            document.getElementById('speakerName').innerText = npc.msg;
-            document.getElementById('speakerSubtitle').innerText = "اجتماع مجلس الإدارة التنفيذي";
+        // Sync and update the HUD Elements
+        function updateHUD() {
+            const config = STAGE_DATABASE[currentLevel];
             
-            const optionsDiv = document.getElementById('dialogueOptions');
-            optionsDiv.innerHTML = "";
-            
-            if (npc.msg.includes("ناصر")) {
-                document.getElementById('narrativeText').innerText = "مرحبا م. نور. يجب أن نطلق لوحة التحكم فوراً لعرضها على المستثمرين، حتى لو كانت هناك بعض الثغرات الأمنية والأعطال في قواعد البيانات. الوقت هو المال والتعويض ضروري!";
-                
-                const opt1 = document.createElement('button');
-                opt1.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs";
-                opt1.innerText = "أوافق على الإطلاق الفوري لإرضاء الإدارة والعملاء (زيادة الضغط النفسي وتراجع الجودة)";
-                opt1.onclick = () => {
-                    stress = Math.min(100, stress + 20);
-                    trust = Math.max(0, trust - 10);
-                    levelGoalCollected++;
-                    addThoughtLog("وافقت نور على الإطلاق السريع. الضغط يرتفع والمسؤولية تؤلم.");
-                    resumeAndClose();
-                };
-                
-                const opt2 = document.createElement('button');
-                opt2.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs";
-                opt2.innerText = "أرفض الإطلاق حتى يتم حل جميع المشاكل التقنية وتأمين النظم (زيادة التوتر الإداري وحماية النطاق)";
-                opt2.onclick = () => {
-                    stress = Math.min(100, stress + 15);
-                    trust = Math.min(100, trust + 15);
-                    levelGoalCollected++;
-                    addThoughtLog("رفضت نور الإطلاق الفوري متمسكة بمعايير الجودة والاستقرار.");
-                    resumeAndClose();
-                };
-                optionsDiv.appendChild(opt1);
-                optionsDiv.appendChild(opt2);
-            } else {
-                document.getElementById('narrativeText').innerText = "يا نور، الفريق في حالة إرهاق تام والجميع يعاني من الاحتراق الداخلي. أطلب منك تأجيل تسليم التقارير ومنحهم بعض الراحة، وإلا سنواجه استقالات جماعية وتراخي النظم.";
-                
-                const opt1 = document.createElement('button');
-                opt1.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs";
-                opt1.innerText = "أمنحهم إجازة فورا لسلامتهم (تقليص سرعة الصعود وزيادة ثقة الفريق العميقة)";
-                opt1.onclick = () => {
-                    stress = Math.max(0, stress - 15);
-                    trust = Math.min(100, trust + 25);
-                    levelGoalCollected++;
-                    addThoughtLog("أعطت نور الأولوية لسلامة فريقها. الارتياح والثقة يعمّان الأجواء.");
-                    resumeAndClose();
-                };
-                
-                const opt2 = document.createElement('button');
-                opt2.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs";
-                opt2.innerText = "أطلب منهم الاستمرار في الضغط من أجل موعد التسليم الوطني الحاسم (زيادة الضغط والإنتاجية الجافة)";
-                opt2.onclick = () => {
-                    stress = Math.min(100, stress + 25);
-                    trust = Math.max(0, trust - 20);
-                    levelGoalCollected++;
-                    addThoughtLog("قررت نور الضغط على الفريق لتسليم المشروع في وقته المحدد.");
-                    resumeAndClose();
-                };
-                optionsDiv.appendChild(opt1);
-                optionsDiv.appendChild(opt2);
-            }
-            
-            document.getElementById('narrativeOverlay').classList.remove('hidden');
-            
-            function resumeAndClose() {
-                document.getElementById('narrativeOverlay').classList.add('hidden');
-                updateHUDPanel();
-                isPlaying = true;
-            }
+            // Core Stress Bar Sync
+            document.getElementById('stressBar').style.width = `${stressIndex}%`;
+
+            // Sidebar Details Sync
+            document.getElementById('sidebarStageTitle').innerText = config.title;
+            document.getElementById('sidebarStageDesc').innerText = config.desc;
+            document.getElementById('truthCount').innerText = `${truthFragmentsCollected} / ${config.targetTruth}`;
+            document.getElementById('memoryCount').innerText = `${memoryFragmentsCollected}`;
+
+            // Sync with Mobile Drawer Panel
+            document.getElementById('mobileTruthCount').innerText = `${truthFragmentsCollected} / ${config.targetTruth}`;
+            document.getElementById('mobileMemoryCount').innerText = `${memoryFragmentsCollected}`;
+
+            // Draw Checklists for Goals
+            const checklistHtml = `
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid ${truthFragmentsCollected >= config.targetTruth ? 'fa-circle-check text-emerald-400' : 'fa-circle text-slate-600'}"></i>
+                    جمع شظايا الحقيقة والبيانات (${truthFragmentsCollected} / ${config.targetTruth})
+                </li>
+                ${currentLevel === 4 ? `
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid ${npcs.filter(n => n.answered).length >= 3 ? 'fa-circle-check text-emerald-400' : 'fa-circle text-slate-600'}"></i>
+                    مساعدة الفريق وتوجيه المبرمجين (${npcs.filter(n => n.answered).length} / 3)
+                </li>
+                ` : ''}
+                ${currentLevel === 5 ? `
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid ${npcs.filter(n => n.answered).length >= 2 ? 'fa-circle-check text-emerald-400' : 'fa-circle text-slate-600'} = 'fa-circle text-slate-600'}"></i>
+                    مفاوضة مجلس الإدارة التنفيذي (${npcs.filter(n => n.answered).length} / 2)
+                </li>
+                ` : ''}
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid ${player.y <= 130 && objectivesFulfilled ? 'fa-circle-check text-emerald-400' : 'fa-circle text-slate-600'}"></i>
+                    الوصول لمنصة النواة الرئيسية (القمة)
+                </li>
+            `;
+            document.getElementById('objectiveList').innerHTML = checklistHtml;
+            document.getElementById('mobileObjectiveList').innerHTML = checklistHtml;
         }
 
-        function triggerFinalDecision() {
-            isPlaying = false;
-            document.getElementById('speakerName').innerText = "نـور - ختام صعود لوحة البيانات";
-            document.getElementById('speakerSubtitle').innerText = "السؤال الحتمي والمصيري";
-            document.getElementById('narrativeText').innerText = "لقد وصلتِ أخيراً لأعلى نقطة في النظام. كرسي المراقبة المركزي شاغر، والشاشة الكبرى تظهر انعكاس ملامحك المجهدة والمتعبة. هل كان الوصول للقمة يستحق أن تفقدي هويتك وصحتك النفسية؟";
-            
-            const optionsDiv = document.getElementById('dialogueOptions');
-            optionsDiv.innerHTML = "";
-
-            const opt1 = document.createElement('button');
-            opt1.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs font-bold text-purple-300";
-            opt1.innerText = "اجلسي على الكرسي لتصبحي جزءاً من لوحة البيانات للأبد (النهاية 1)";
-            opt1.onclick = () => {
-                document.getElementById('narrativeOverlay').classList.add('hidden');
-                triggerEnding(1);
-            };
-
-            const opt2 = document.createElement('button');
-            opt2.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs font-bold text-emerald-300";
-            opt2.innerText = "أعيدي برمجة خوارزميات النظام لتكون أكثر إنسانية وتشاركية (النهاية 2)";
-            opt2.onclick = () => {
-                document.getElementById('narrativeOverlay').classList.add('hidden');
-                triggerEnding(2);
-            };
-
-            const opt3 = document.createElement('button');
-            opt3.className = "w-full text-right p-3 rounded-lg border border-slate-800 hover:border-cyan-400 bg-slate-900/60 transition text-xs font-bold text-amber-300";
-            opt3.innerText = "أطفئي السيرفر بالكامل، واخرجي لاستنشاق الهواء والنظر للشمس (النهاية 3)";
-            opt3.onclick = () => {
-                document.getElementById('narrativeOverlay').classList.add('hidden');
-                triggerEnding(3);
-            };
-
-            optionsDiv.appendChild(opt1);
-            optionsDiv.appendChild(opt2);
-            optionsDiv.appendChild(opt3);
-            document.getElementById('narrativeOverlay').classList.remove('hidden');
-        }
-
-        function triggerEnding(endingIndex) {
-            isPlaying = false;
-            isGameOver = true;
-            
-            const overlay = document.getElementById('endOverlay');
-            const title = document.getElementById('endTitle');
-            const desc = document.getElementById('endDesc');
-            const emoji = document.getElementById('endEmoji');
-            
-            overlay.classList.remove('hidden');
-
-            if (endingIndex === 1) {
-                emoji.innerText = "💻👁️🏢";
-                title.innerText = "الخاتمة الأولى: العيش داخل لوحة البيانات";
-                title.className = "text-xl font-extrabold text-purple-400 mb-2";
-                desc.innerText = "جلست نور على الكرسي وأغمضت عينيها.. تحول جسدها ببطء إلى ملايين البيكسلات المضيئة والرموز الرقمية. لقد أصبحت نور لوحة التحكم نفسها، تراقب وتدير الأرقام للأبد، حامية للنظام الإداري ولكنها فقدت روحها وكيانها البشري بالكامل.";
-            } else if (endingIndex === 2) {
-                emoji.innerText = "🤝💚🌱";
-                title.innerText = "الخاتمة الثانية: إعادة هندسة الأنظمة الإنسانية";
-                title.className = "text-xl font-extrabold text-emerald-400 mb-2";
-                desc.innerText = "رفضت نور الجلوس على الكرسي التنافسي الأناني. قامت بإدخال شفرة برمجية جديدة تعيد هيكلة النظام ليركز على صحة وراحة فريق العمل قبل الأرقام الجافة. أصبحت لوحة التحكم مكاناً مرناً وتشاركياً يقدّر الإنسان والبيانات معاً.";
-            } else {
-                emoji.innerText = "🌅🚶‍♀️✨";
-                title.innerText = "الخاتمة الثالثة: إطفاء الخادم والحرية الكاملة";
-                title.className = "text-xl font-extrabold text-amber-400 mb-2";
-                desc.innerText = "سحبت نور كود إغلاق المضيف الرئيسي. فجأة، انطفأت شاشات النيون الضخمة، واختفت الخطوط البيانية المتوهجة لتكشف لأول مرة عن نافذة حقيقية ينساب منها ضوء الشمس الفعلي. مشت نور بخطى ثابتة نحو الخارج تاركة التقارير والأرقام خلفها، مستمتعة بالهواء النقي لأول مرة.";
-            }
-        }
-
-        // Register Sensory keyboard inputs
+        // Standard Keyboard handlers
         window.addEventListener('keydown', (e) => {
             keys[e.code] = true;
-            if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+            if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
                 e.preventDefault();
             }
         });
@@ -1146,16 +784,19 @@
             keys[e.code] = false;
         });
 
-        // Setup Mobile input touch buttons
-        const setupMobileEvents = () => {
+        // Pointer/Touch Controllers (Optimized, with Swapped arrow handlers)
+        function registerTouchControls() {
             const btnLeft = document.getElementById('btnLeft');
             const btnRight = document.getElementById('btnRight');
             const btnJump = document.getElementById('btnJump');
+
             if (btnLeft && btnRight && btnJump) {
+                // Button Left actually triggers move Left
                 btnLeft.addEventListener('pointerdown', (e) => { e.preventDefault(); touchLeft = true; });
                 btnLeft.addEventListener('pointerup', (e) => { e.preventDefault(); touchLeft = false; });
                 btnLeft.addEventListener('pointerleave', (e) => { e.preventDefault(); touchLeft = false; });
 
+                // Button Right actually triggers move Right
                 btnRight.addEventListener('pointerdown', (e) => { e.preventDefault(); touchRight = true; });
                 btnRight.addEventListener('pointerup', (e) => { e.preventDefault(); touchRight = false; });
                 btnRight.addEventListener('pointerleave', (e) => { e.preventDefault(); touchRight = false; });
@@ -1164,328 +805,295 @@
                 btnJump.addEventListener('pointerup', (e) => { e.preventDefault(); touchJump = false; });
                 btnJump.addEventListener('pointerleave', (e) => { e.preventDefault(); touchJump = false; });
             }
-        };
-        setupMobileEvents();
-
-        function addThoughtLog(text) {
-            const logs = document.getElementById('thoughtLogs');
-            const mobileLogs = document.getElementById('mobileThoughtLogs');
-            
-            const logDiv = document.createElement('div');
-            logDiv.innerHTML = `> ${text}`;
-            
-            if (logs) {
-                logs.appendChild(logDiv.cloneNode(true));
-                logs.scrollTop = logs.scrollHeight;
-            }
-            if (mobileLogs) {
-                mobileLogs.appendChild(logDiv);
-                mobileLogs.scrollTop = mobileLogs.scrollHeight;
-            }
         }
+        registerTouchControls();
 
-        function pauseActiveGame() {
-            if (!isPlaying || isGameOver) return;
-            isPlaying = false;
-            
-            const data = levelsDatabase[currentSelectedLevel];
-            document.getElementById('pauseStageTitle').innerText = data.title;
-            document.getElementById('pauseStageDesc').innerText = data.desc;
-            
-            let targetCount = data.target;
-            document.getElementById('pauseGoalProgress').innerText = `${levelGoalCollected} / ${targetCount}`;
-            
-            updatePauseDifficultyButtons(activeDifficulty);
-            document.getElementById('pauseOverlay').classList.remove('hidden');
-            addThoughtLog("تم تعليق النظم لمراجعة الأهداف وضبط الصعوبة.");
-        }
+        // Dialogue Box UI trigger
+        function openDialogue(npc) {
+            activeDialogue = npc;
+            isPlaying = false; // pause game loop movement but keep drawings active
 
-        function resumeActiveGame() {
-            document.getElementById('pauseOverlay').classList.add('hidden');
-            isPlaying = true;
-            addThoughtLog("تم استئناف النظم العصبية بنجاح.");
-        }
+            const container = document.getElementById('dialogueContainer');
+            container.classList.remove('hidden');
 
-        function setPauseDifficulty(diff) {
-            setDifficulty(diff);
-            updatePauseDifficultyButtons(diff);
-            addThoughtLog(`تم تحويل مؤشر الصعوبة فوراً إلى: ${diff === 'easy' ? 'مستقر' : diff === 'medium' ? 'مضغوط' : 'حرج'}`);
-        }
+            document.getElementById('dialogueSpeaker').innerText = npc.name;
+            document.getElementById('dialogueText').innerText = npc.dialogue;
 
-        function updatePauseDifficultyButtons(diff) {
-            document.getElementById('pauseDiffEasy').className = "py-1.5 rounded-lg border text-[10px] font-bold transition " + (diff === 'easy' ? 'border-emerald-500 bg-emerald-500/15 text-emerald-400' : 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400');
-            document.getElementById('pauseDiffMedium').className = "py-1.5 rounded-lg border text-[10px] font-bold transition " + (diff === 'medium' ? 'border-cyan-400 bg-cyan-400/15 text-cyan-400' : 'border-cyan-400/20 bg-cyan-400/5 text-cyan-400');
-            document.getElementById('pauseDiffHard').className = "py-1.5 rounded-lg border text-[10px] font-bold transition " + (diff === 'hard' ? 'border-rose-500 bg-rose-500/15 text-rose-400' : 'border-rose-500/20 bg-rose-500/5 text-rose-400');
-        }
+            const opts = document.getElementById('dialogueOptions');
+            opts.innerHTML = '';
 
-        function rebuildStageWithNewDiff() {
-            document.getElementById('pauseOverlay').classList.add('hidden');
-            isPlaying = true;
-            buildDashboardSector();
-            updateHUDPanel();
-            addThoughtLog("تمت إعادة توليد البيئة والمنصات بما يتلاءم مع مستوى الصعوبة الجديد.");
-        }
-
-        function abortMission() {
-            document.getElementById('pauseOverlay').classList.add('hidden');
-            backToControl();
-            addThoughtLog("تم الانسحاب من المهمة بنجاح والتراجع لخريطة النظم.");
-        }
-
-        // Add Escape key handler
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Escape') {
-                if (isPlaying && !isGameOver) {
-                    pauseActiveGame();
-                } else if (!document.getElementById('pauseOverlay').classList.contains('hidden')) {
-                    resumeActiveGame();
+            // Render customized branch choices based on NPC types
+            if (npc.type === 'team_member') {
+                opts.innerHTML = `
+                    <button onclick="handleDialogueChoice('help')" class="w-full text-right p-2.5 bg-slate-950 hover:bg-slate-800 rounded-lg text-xs font-bold text-sky-300 border border-slate-800 transition no-double-tap">
+                        👍 تفويض المهام والمساعدة (+10% توتر للفريق، -5% لتوترك)
+                    </button>
+                    <button onclick="handleDialogueChoice('ignore')" class="w-full text-right p-2.5 bg-slate-950 hover:bg-slate-800 rounded-lg text-xs font-bold text-rose-300 border border-slate-800 transition no-double-tap">
+                        👎 اطلب منهم التعامل بأنفسهم (+15% لمعدل توترك)
+                    </button>
+                `;
+            } else if (npc.type === 'board_npc') {
+                if (npc.name.includes("ناصر")) {
+                    opts.innerHTML = `
+                        <button onclick="handleDialogueChoice('deploy_fast')" class="w-full text-right p-2.5 bg-slate-950 hover:bg-slate-800 rounded-lg text-xs font-bold text-amber-300 border border-slate-800 transition no-double-tap">
+                            🚀 إطلاق فوري لتسريع الحصة السوقية (+25% لتوترك، تفتح ثغرات)
+                        </button>
+                        <button onclick="handleDialogueChoice('delay_board')" class="w-full text-right p-2.5 bg-slate-950 hover:bg-slate-800 rounded-lg text-xs font-bold text-sky-300 border border-slate-800 transition no-double-tap">
+                            🛡️ الرفض وتجربة النظام بالكامل أولاً (+5% استقرار للفريق، حقيقة جديدة 🔑)
+                        </button>
+                    `;
+                } else {
+                    opts.innerHTML = `
+                        <button onclick="handleDialogueChoice('delay_team')" class="w-full text-right p-2.5 bg-slate-950 hover:bg-slate-800 rounded-lg text-xs font-bold text-emerald-300 border border-slate-800 transition no-double-tap">
+                            💚 تأجيل الإطلاق لضمان السلامة المهنية (-15% توتر للفريق، شظية حقيقة 🔑)
+                        </button>
+                        <button onclick="handleDialogueChoice('push_team')" class="w-full text-right p-2.5 bg-slate-950 hover:bg-slate-800 rounded-lg text-xs font-bold text-rose-300 border border-slate-800 transition no-double-tap">
+                            ⚡ الضغط على الفريق للمضي قدماً (+20% لمعدل توترك)
+                        </button>
+                    `;
                 }
             }
-        });
-
-        // Objective failure warning prompt
-        function triggerObjectiveWarning(msg) {
-            const alertBox = document.getElementById('objectiveAlert');
-            const alertText = document.getElementById('objectiveAlertText');
-            if (!alertBox) return;
-
-            alertText.innerText = msg;
-            alertBox.classList.remove('hidden');
-            alertBox.classList.remove('scale-90');
-            alertBox.classList.add('scale-100');
-
-            setTimeout(() => {
-                alertBox.classList.add('scale-90');
-                setTimeout(() => alertBox.classList.add('hidden'), 200);
-            }, 2500);
         }
 
-        function updatePhysics() {
-            let maxSpeed = player.speed - (stress / 45); 
-            if (keys['ArrowLeft'] || keys['KeyA'] || touchLeft) {
-                player.vx = -maxSpeed;
-                player.dir = 'left';
-            } else if (keys['ArrowRight'] || keys['KeyD'] || touchRight) {
-                player.vx = maxSpeed;
-                player.dir = 'right';
-            } else {
-                player.vx *= 0.82;
+        function handleDialogueChoice(choice) {
+            playSound('choice');
+            const container = document.getElementById('dialogueContainer');
+            container.classList.add('hidden');
+
+            if (activeDialogue) {
+                activeDialogue.answered = true;
+
+                if (choice === 'help') {
+                    stressIndex = Math.max(10, stressIndex - 5);
+                    memoryFragmentsCollected++;
+                    logMessage('ساعدت عضو فريق العمل. تم توثيق المساعدة وبناء الثقة.', 'success');
+                } else if (choice === 'ignore') {
+                    stressIndex = Math.min(100, stressIndex + 15);
+                    logMessage('تجاهلت الفريق. تزايد العبء الفردي والضغط.', 'error');
+                } else if (choice === 'deploy_fast') {
+                    stressIndex = Math.min(100, stressIndex + 25);
+                    logMessage('اتخذت خيار الإطلاق السريع. الخوادم تعاني من تذبذب الأداء.', 'error');
+                } else if (choice === 'delay_board') {
+                    truthFragmentsCollected++;
+                    logMessage('تم رفض الإطلاق السريع. مصلحة سلامة البيانات أولاً.', 'success');
+                } else if (choice === 'delay_team') {
+                    stressIndex = Math.max(10, stressIndex - 15);
+                    truthFragmentsCollected++;
+                    logMessage('تم تمديد فترة التحقق لحماية سلامة الموظفين النفسية.', 'success');
+                } else if (choice === 'push_team') {
+                    stressIndex = Math.min(100, stressIndex + 20);
+                    logMessage('أمرت بالضغط المستمر. النظام يعاني من ثقل الوعي.', 'error');
+                }
             }
 
-            player.vy += player.gravity;
+            activeDialogue = null;
+            updateHUD();
+            
+            // Resume Gameplay physics
+            isPlaying = true;
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Physics Updates
+        function updatePhysics() {
+            if (!isPlaying || isPaused) return;
+
+            const config = STAGE_DATABASE[currentLevel];
+            const diff = difficultySettings[currentDifficulty];
+
+            // Horizontal Controls Velocity
+            let speed = 5;
+            if (keys['ArrowLeft'] || keys['KeyA'] || touchLeft) {
+                player.vx = -speed;
+                player.dir = 'left';
+            } else if (keys['ArrowRight'] || keys['KeyD'] || touchRight) {
+                player.vx = speed;
+                player.dir = 'right';
+            } else {
+                player.vx *= 0.85;
+            }
+
+            // Apply gravity
+            player.vy += diff.gravity;
+
+            // Apply wind drift on Stage 2
+            if (currentLevel === 2) {
+                player.vx += Math.sin(Date.now() / 600) * 0.4; // subtle drift
+            }
+
+            // Update Coordinates
             player.x += player.vx;
             player.y += player.vy;
 
-            // Horizontal wrappers
-            if (player.x + player.width < 0) player.x = WORLD_WIDTH - 10;
-            else if (player.x > WORLD_WIDTH) player.x = -player.width + 10;
+            // Horizontal Wrap edges
+            if (player.x + player.width < 0) {
+                player.x = WORLD_WIDTH - 10;
+            } else if (player.x > WORLD_WIDTH) {
+                player.x = -player.width + 10;
+            }
 
-            // Platform collision tracking
+            // Jumping Inputs
+            let wantsJump = (keys['Space'] || keys['ArrowUp'] || keys['KeyW'] || touchJump);
+            if (wantsJump) {
+                if (player.isGrounded) {
+                    player.vy = -12.5;
+                    player.isGrounded = false;
+                    player.doubleJumpAvailable = true;
+                    playSound('jump');
+                    
+                    // Reset single triggers
+                    if (keys['Space']) keys['Space'] = false;
+                    if (keys['ArrowUp']) keys['ArrowUp'] = false;
+                    if (keys['KeyW']) keys['KeyW'] = false;
+                    touchJump = false;
+                } else if (player.doubleJumpAvailable) {
+                    player.vy = -10.5;
+                    player.doubleJumpAvailable = false;
+                    playSound('jump');
+                    logMessage('قفزة الدعم النفسي المزدوجة!', 'system');
+                    
+                    if (keys['Space']) keys['Space'] = false;
+                    if (keys['ArrowUp']) keys['ArrowUp'] = false;
+                    if (keys['KeyW']) keys['KeyW'] = false;
+                    touchJump = false;
+                }
+            }
+
+            // Platform Collision Checks
             player.isGrounded = false;
-            for (let plat of platforms) {
-                if (player.x + player.width > plat.x && player.x < plat.x + plat.width) {
+            for (let i = 0; i < platforms.length; i++) {
+                let plat = platforms[i];
+
+                // Moving platform update
+                if (plat.isMoving) {
+                    plat.x += plat.moveSpeed * plat.dir;
+                    if (plat.x < plat.rangeX[0]) {
+                        plat.x = plat.rangeX[0];
+                        plat.dir = 1;
+                    } else if (plat.x > plat.rangeX[1]) {
+                        plat.x = plat.rangeX[1];
+                        plat.dir = -1;
+                    }
+                }
+
+                // Vertical landing
+                if (player.x + player.width/2 >= plat.x && player.x + player.width/2 <= plat.x + plat.width) {
                     if (player.vy > 0) {
                         if (player.y + player.height >= plat.y && player.y + player.height - player.vy <= plat.y + 8) {
                             player.y = plat.y - player.height;
                             player.vy = 0;
                             player.isGrounded = true;
+                            player.doubleJumpAvailable = true;
 
-                            if (plat.type === 'fake_kpi') {
-                                plat.touched = true;
+                            if (plat.isMoving) {
+                                player.x += plat.moveSpeed * plat.dir;
                             }
                         }
                     }
                 }
             }
 
-            // Fake KPIs platform decay timers
-            for (let i = platforms.length - 1; i >= 0; i--) {
-                let plat = platforms[i];
-                if (plat.type === 'fake_kpi' && plat.touched) {
-                    plat.decayTimer--;
-                    if (plat.decayTimer <= 0) {
-                        for (let d = 0; d < 8; d++) {
-                            particles.push({
-                                x: plat.x + Math.random() * plat.width,
-                                y: plat.y,
-                                vx: Math.random() * 2 - 1,
-                                vy: Math.random() * 2 + 1,
-                                size: Math.random() * 3 + 1,
-                                color: 'rgba(239, 68, 68, 0.7)',
-                                life: 25
-                            });
-                        }
-                        platforms.splice(i, 1);
-                        addThoughtLog("انهار مؤشر أداء مزيف (Corrupted KPI) تحت قدم نور!");
-                    }
-                }
+            // Screen shake when Stress is critical (>75%)
+            if (stressIndex >= 75 && Math.random() < 0.1) {
+                flashDamageOverlay();
             }
 
-            // Jumping action
-            let wantsJump = keys['Space'] || keys['ArrowUp'] || keys['KeyW'] || touchJump;
-            if (wantsJump && player.isGrounded) {
-                let jumpImpulse = player.jumpForce + (stress / 60);
-                player.vy = jumpImpulse;
-                player.isGrounded = false;
-                
-                if (isSynthInit && !Tone.getDestination().mute) {
-                    try { backTrack.triggerAttackRelease("G4", "16n", undefined, 0.1); } catch(e){}
-                }
-
-                touchJump = false;
-                if (keys['Space']) keys['Space'] = false;
-                if (keys['ArrowUp']) keys['ArrowUp'] = false;
-                if (keys['KeyW']) keys['KeyW'] = false;
-            }
-
-            // Fall recovery
+            // Falls check
             if (player.y > WORLD_HEIGHT) {
-                player.x = WORLD_WIDTH / 2;
                 player.y = WORLD_HEIGHT - 120;
-                player.vx = 0;
-                player.vy = 0;
-                stress = Math.min(100, stress + 15);
-                addThoughtLog("سقوط مؤلم للأنظمة السفلية. تضاعف الضغط النفسي لنور.");
-                updateHUDPanel();
+                player.vy = -8;
+                stressIndex = Math.min(100, stressIndex + 20);
+                flashDamageOverlay();
+                playSound('damage');
+                logMessage('انزلقت نور لثوانٍ وتراجع استقرار الوعي السلوكي (+20% توتر)', 'error');
+                updateHUD();
+                if (stressIndex >= 100) {
+                    triggerEnd(false);
+                }
             }
 
-            // Smoothly target camera to player height
-            let targetCameraY = player.y - canvas.height / 2;
-            targetCameraY = Math.max(0, Math.min(WORLD_HEIGHT - canvas.height, targetCameraY));
-            cameraY += (targetCameraY - cameraY) * 0.1;
+            // Smooth Interpolated Camera tracking
+            let targetCamY = player.y - canvas.height / 2;
+            targetCamY = Math.max(0, Math.min(WORLD_HEIGHT - canvas.height, targetCamY));
+            cameraY += (targetCamY - cameraY) * 0.1;
 
-            // Evaluate dialogue sensor zones
-            Object.keys(activeDialogues).forEach(levelKey => {
-                let diag = activeDialogues[levelKey];
-                if (player.y <= diag.triggerY && !dialogTriggered[levelKey] && currentSelectedLevel === parseInt(levelKey)) {
-                    triggerDialogue(levelKey);
+            // Check goals verification
+            const currentTruthGoal = config.targetTruth;
+            let currentSecondaryGoal = true;
+            if (currentLevel === 4) {
+                currentSecondaryGoal = npcs.filter(n => n.answered).length >= 3;
+            } else if (currentLevel === 5) {
+                currentSecondaryGoal = npcs.filter(n => n.answered).length >= 2;
+            }
+
+            if (truthFragmentsCollected >= currentTruthGoal && currentSecondaryGoal) {
+                objectivesFulfilled = true;
+            }
+
+            // Target Core Reached
+            if (player.y <= 140) {
+                if (objectivesFulfilled) {
+                    triggerEnd(true);
+                } else {
+                    player.vy = 8; // gentle pushback
+                    logMessage('لا يمكنك استعادة النواة دون جمع شظايا الحقيقة ومتطلبات الفصل أولاً!', 'error');
                 }
-            });
+            }
+        }
 
-            // Noor Facial emotional rendering states
-            if (player.vy < -2) player.faceState = 'happy';
-            else if (player.vy > 4) player.faceState = 'falling';
-            else if (stress > 60) player.faceState = 'sad';
-            else player.faceState = 'normal';
+        // Flash visual damage overlay
+        function flashDamageOverlay() {
+            const overlay = document.getElementById('damageFlash');
+            overlay.style.backgroundColor = 'rgba(244, 63, 94, 0.35)';
+            setTimeout(() => {
+                overlay.style.backgroundColor = 'rgba(244, 63, 94, 0)';
+            }, 150);
         }
 
         function updateEntities() {
-            const data = levelsDatabase[currentSelectedLevel];
+            if (!isPlaying || isPaused) return;
 
+            // Update symbols background
+            for (let sym of bgSymbols) {
+                sym.y += sym.speed;
+                if (sym.y > WORLD_HEIGHT) sym.y = 0;
+            }
+
+            // Collide Collectibles
             for (let i = items.length - 1; i >= 0; i--) {
                 let item = items[i];
                 item.pulse += 0.08;
 
-                let dist = Math.hypot((player.x + player.width/2) - item.x, (player.y + player.height/2) - item.y);
-                if (dist < 25) {
-                    if (item.type === 'data_fragment') {
-                        levelGoalCollected++;
-                        addThoughtLog("تمت معالجة شريحة حقيقة جديدة. متطلبات الهدف تكتمل.");
-                        collectedFragments.push(`بيانات المرحلة ${currentSelectedLevel} #${levelGoalCollected}`);
-                    } else if (item.type === 'reflection_chair') {
-                        triggerFinalDecision();
-                    } else if (item.type === 'core_terminal') {
-                        // Summit portal touch validation check
-                        if (data.goalType === 'collect' && levelGoalCollected < data.target) {
-                            triggerObjectiveWarning(`المهمة لم تكتمل! يرجى جمع ${data.target} شظايا لتفعيل الترحيل.`);
-                            player.vy = 5; // pushback
-                        } else if (data.goalType === 'boss' && !levelBossDefeated) {
-                            triggerObjectiveWarning("تحذير: لا يمكنك صعود السيرفر الرئيسي قبل تحييد الزعيم بالكامل!");
-                            player.vy = 5;
-                        } else if (data.goalType === 'npc' && levelGoalCollected < data.target) {
-                            triggerObjectiveWarning("المهمة لم تكتمل! يرجى الاستجابة لطلبات الإدارة والتحدث معهم أولاً.");
-                            player.vy = 5;
-                        } else {
-                            triggerVictory();
-                        }
-                    }
-
-                    if (item.type !== 'reflection_chair' && item.type !== 'core_terminal') {
-                        items.splice(i, 1);
-                    }
-                    updateHUDPanel();
+                if (player.x < item.x + item.width &&
+                    player.x + player.width > item.x - item.width &&
+                    player.y < item.y + item.height &&
+                    player.y + player.height > item.y - item.height) {
+                    
+                    truthFragmentsCollected++;
+                    playSound('collect');
+                    logMessage('شظية حقيقة مسترجعة 🔑. زيادة الثقة واستعادة التوازن بنسبة 5%', 'success');
+                    items.splice(i, 1);
+                    updateHUD();
                 }
             }
 
-            // Dialogue NPC interaction mapping
-            for (let e of enemies) {
-                if ((e.type === 'team_npc' || e.type === 'board_npc') && !e.helped) {
-                    let dist = Math.hypot((player.x + player.width/2) - e.x, (player.y + player.height/2) - e.y);
-                    if (dist < 35) {
-                        e.helped = true;
-                        if (e.type === 'board_npc') {
-                            triggerExecutiveMeetingDialogue(e);
-                        } else {
-                            triggerTeamHelpDialogue(e);
-                        }
+            // Collide NPCs to trigger dialog
+            for (let npc of npcs) {
+                if (!npc.answered) {
+                    if (player.x < npc.x + npc.width &&
+                        player.x + player.width > npc.x &&
+                        player.y < npc.y + npc.height &&
+                        player.y + player.height > npc.y) {
+                        
+                        openDialogue(npc);
                     }
-                }
-            }
-
-            // Cleanup active memory particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life--;
-                if (p.life <= 0) particles.splice(i, 1);
-            }
-            if (particles.length > 80) {
-                particles.splice(0, particles.length - 80);
-            }
-
-            // Boss operations
-            for (let b of bossEntities) {
-                b.pulse += 0.05;
-                b.x += b.dir * 1.8;
-                if (b.x < 150 || b.x > WORLD_WIDTH - b.width - 150) {
-                    b.dir *= -1;
-                }
-
-                // Randomizing stress hazard bubbles
-                if (Math.random() < 0.02) {
-                    particles.push({
-                        x: b.x + b.width / 2,
-                        y: b.y + b.height,
-                        vx: Math.random() * 2 - 1,
-                        vy: Math.random() * 3 + 3,
-                        size: Math.random() * 5 + 2,
-                        color: 'rgba(244, 63, 94, 0.9)',
-                        life: 100
-                    });
-                }
-
-                // Noor collisions with boss hazards
-                for (let p of particles) {
-                    let pDist = Math.hypot((player.x + player.width/2) - p.x, (player.y + player.height/2) - p.y);
-                    if (pDist < 18) {
-                        stress = Math.min(100, stress + 1);
-                        document.getElementById('hudStress').style.width = `${stress}%`;
-                    }
-                }
-
-                // Defeating boss via altitude metric triggers
-                if (player.y < b.y + 150) {
-                    levelBossDefeated = true;
-                    b.health = 0;
-                    addThoughtLog("تم تجاوز وحل تداعيات الزعيم البرمجي! الطريق للقمة مفتوح.");
                 }
             }
         }
 
+        // Unified rendering module
         function drawGame() {
-            ctx.save();
-            if (stress > 65) {
-                let dx = Math.random() * (stress / 15) - (stress / 30);
-                let dy = Math.random() * (stress / 15) - (stress / 30);
-                ctx.translate(dx, dy);
-                
-                ctx.strokeStyle = `rgba(239, 68, 68, ${ (stress - 50) / 100 })`;
-                ctx.lineWidth = 15;
-                ctx.strokeRect(0, 0, canvas.width, canvas.height);
-            }
-
-            ctx.fillStyle = '#02040a';
+            ctx.fillStyle = '#030712'; // deep cyberpunk void
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const scale = canvas.width / WORLD_WIDTH;
@@ -1493,201 +1101,214 @@
             ctx.scale(scale, scale);
             ctx.translate(0, -cameraY);
 
-            // Draw Background static elements
-            for (let t of textDecors) {
-                ctx.fillStyle = t.color;
-                ctx.font = `${t.size}px monospace`;
-                ctx.fillText(t.text, t.x, t.y);
+            // 1. Draw Scanner Grid
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.04)';
+            ctx.lineWidth = 1;
+            let startGridY = Math.floor(cameraY / 50) * 50;
+            for (let y = startGridY; y < startGridY + canvas.height / scale + 50; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(WORLD_WIDTH, y);
+                ctx.stroke();
             }
 
-            // Draw platforms
+            // 2. Background symbols
+            for (let sym of bgSymbols) {
+                ctx.fillStyle = `rgba(139, 92, 246, ${sym.alpha})`; // Purple Neon
+                ctx.font = '10px Courier New';
+                ctx.fillText(sym.char, sym.x, sym.y);
+            }
+
+            // 3. Draw Stage 2 wind waves
+            if (currentLevel === 2) {
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                let windOffset = Math.sin(Date.now() / 600) * 30;
+                for (let wy = cameraY; wy < cameraY + canvas.height / scale; wy += 80) {
+                    ctx.moveTo(50 + windOffset, wy);
+                    ctx.lineTo(WORLD_WIDTH - 50 + windOffset, wy + 20);
+                }
+                ctx.stroke();
+            }
+
+            // 4. Draw Platforms
             for (let plat of platforms) {
                 if (plat.y < cameraY - 100 || plat.y > cameraY + canvas.height / scale + 100) continue;
 
                 if (plat.type === 'base') {
-                    ctx.fillStyle = plat.color;
+                    ctx.fillStyle = '#090d16';
                     ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
                 } else {
-                    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+                    // Glassmorphic interactive cards representation
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
                     ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
 
-                    ctx.strokeStyle = plat.color;
-                    ctx.lineWidth = 2;
+                    let borderCol = '#0ea5e9'; // standard sky blue
+                    if (plat.type === 'bar_chart') borderCol = '#22c55e'; // green
+                    if (plat.type === 'kpi_gauge') borderCol = '#a855f7'; // purple
+                    if (plat.type === 'workflow_card') borderCol = '#f59e0b'; // amber
+                    if (plat.type === 'summit') borderCol = '#10b981'; // emerald
+
+                    ctx.strokeStyle = borderCol;
+                    ctx.lineWidth = 1.5;
                     ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
 
-                    // Platform decoration detail
-                    if (plat.type === 'normal') {
-                        ctx.fillStyle = 'rgba(34, 211, 238, 0.15)';
-                        let columns = 4;
-                        let colW = plat.width / columns;
-                        for (let j = 0; j < columns; j++) {
-                            let h = (plat.height + 5) * ((j + 1) / columns);
-                            ctx.fillRect(plat.x + (j * colW) + 2, plat.y + plat.height - h, colW - 4, h);
-                        }
-                    } else if (plat.type === 'fake_kpi') {
-                        ctx.fillStyle = '#ef4444';
-                        ctx.font = 'bold 8px Cairo';
-                        ctx.fillText("KPI: MANIPULATED DATA", plat.x + 8, plat.y - 4);
-                    }
+                    // Platform indicators
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.font = 'bold 8px Cairo';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(plat.title, plat.x + plat.width - 8, plat.y - 4);
                 }
             }
 
-            // Draw Items
+            // 5. Draw Collectibles
             for (let item of items) {
-                let bounce = Math.sin(item.pulse) * 4;
-                ctx.save();
-                ctx.shadowBlur = 15;
+                let size = 6 + Math.sin(item.pulse) * 2.5;
+                ctx.shadowColor = '#10b981';
+                ctx.shadowBlur = size * 1.5;
                 
-                if (item.type === 'data_fragment') {
-                    ctx.shadowColor = '#22d3ee';
-                    ctx.fillStyle = '#22d3ee';
-                    ctx.beginPath();
-                    ctx.arc(item.x, item.y + bounce, 7, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#0f172a';
-                    ctx.font = 'bold 8px monospace';
-                    ctx.fillText("🔑", item.x - 4, item.y + bounce + 3);
-                } else if (item.type === 'reflection_chair') {
-                    ctx.shadowColor = '#fbbf24';
-                    ctx.strokeStyle = '#fbbf24';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(item.x - 15, item.y, 30, 40);
-                    ctx.fillStyle = 'rgba(251, 191, 36, 0.2)';
-                    ctx.fillRect(item.x - 15, item.y - 15, 30, 15);
-                    ctx.fillStyle = '#fbbf24';
-                    ctx.font = 'bold 8px Cairo';
-                    ctx.fillText("كرسي القيادة", item.x - 22, item.y - 25);
-                } else if (item.type === 'core_terminal') {
-                    ctx.shadowColor = '#10b981';
-                    ctx.fillStyle = '#10b981';
-                    ctx.beginPath();
-                    ctx.arc(item.x, item.y, 10, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 8px Cairo';
-                    ctx.fillText("النواة", item.x - 10, item.y - 15);
-                }
-                ctx.restore();
+                ctx.fillStyle = '#10b981';
+                ctx.beginPath();
+                ctx.arc(item.x, item.y, size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.shadowBlur = 0; // reset
             }
 
-            // Draw NPCs
-            for (let e of enemies) {
-                if (e.type === 'team_npc' || e.type === 'board_npc') {
-                    ctx.fillStyle = e.helped ? '#10b981' : (e.type === 'board_npc' ? '#f59e0b' : '#a855f7');
-                    ctx.shadowColor = ctx.fillStyle;
-                    ctx.shadowBlur = 10;
-                    ctx.fillRect(e.x, e.y, e.width, e.height);
-                    ctx.shadowBlur = 0;
-
-                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                    ctx.font = '7px Cairo';
-                    let label = e.helped ? "شكراً نور!" : (e.type === 'board_npc' ? "اجتماع تنفيذي!" : "أحتاج دعمك!");
-                    ctx.fillText(label, e.x - 10, e.y - 8);
-                }
-            }
-
-            // Draw Bosses
-            for (let b of bossEntities) {
-                if (b.health <= 0) continue;
+            // 6. Draw Team & Executive NPCs
+            for (let npc of npcs) {
+                if (npc.answered) continue;
                 ctx.save();
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
-                ctx.strokeStyle = '#f43f5e';
-                ctx.lineWidth = 4;
-                ctx.shadowColor = '#f43f5e';
-                ctx.shadowBlur = 20 + Math.sin(b.pulse) * 8;
                 
-                ctx.fillRect(b.x, b.y, b.width, b.height);
-                ctx.strokeRect(b.x, b.y, b.width, b.height);
+                // Neon core body for team members
+                ctx.shadowColor = npc.type === 'board_npc' ? '#f59e0b' : '#38bdf8';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = npc.type === 'board_npc' ? '#f59e0b' : '#38bdf8';
+                
+                ctx.beginPath();
+                ctx.arc(npc.x + npc.width/2, npc.y + npc.height/2, npc.width/2, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.shadowBlur = 0;
 
-                ctx.fillStyle = '#f43f5e';
-                ctx.beginPath();
-                ctx.arc(b.x + b.width/2, b.y + b.height/2, 20 + Math.sin(b.pulse) * 4, 0, Math.PI * 2);
-                ctx.fill();
-
+                // Name tag
                 ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 8px Cairo';
+                ctx.font = '8px Cairo';
                 ctx.textAlign = 'center';
-                if (b.type === 'error_cascade') {
-                    ctx.fillText("ERROR_CASCADE.SYS", b.x + b.width/2, b.y - 10);
-                } else if (b.type === 'burnout_exe') {
-                    ctx.fillText("BURNOUT.EXE", b.x + b.width/2, b.y - 10);
-                } else if (b.type === 'pressure_engine') {
-                    ctx.fillText("CORE_PRESSURE_ENGINE", b.x + b.width/2, b.y - 10);
-                }
+                ctx.fillText(npc.name, npc.x + npc.width/2, npc.y - 6);
                 ctx.restore();
             }
 
-            // Draw falling alarm/hazard particles
-            for (let p of particles) {
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
+            // 7. Draw Character "Noor" as a beautiful glowing core
+            player.glow += player.glowDir * 0.35;
+            if (player.glow > 22 || player.glow < 8) {
+                player.glowDir *= -1;
             }
 
-            ctx.shadowColor = '#22d3ee';
-            ctx.shadowBlur = player.isGrounded ? 15 : 25;
-            
-            ctx.fillStyle = 'rgba(34, 211, 238, 0.4)';
+            ctx.shadowColor = '#0ea5e9';
+            ctx.shadowBlur = player.glow;
+
+            // Translucent aura
+            ctx.fillStyle = 'rgba(14, 165, 233, 0.25)';
             ctx.beginPath();
-            ctx.arc(player.x + player.width/2, player.y + player.height/2, player.width + 2, 0, Math.PI * 2);
+            ctx.arc(player.x + player.width/2, player.y + player.height/2, player.width/2 + 6, 0, Math.PI * 2);
             ctx.fill();
 
-            let grad = ctx.createRadialGradient(
+            // Core sphere
+            let radGrd = ctx.createRadialGradient(
                 player.x + player.width/2, player.y + player.height/2, 2,
-                player.x + player.width/2, player.y + player.height/2, player.width
+                player.x + player.width/2, player.y + player.height/2, player.width/2
             );
-            grad.addColorStop(0, '#ffffff');
-            grad.addColorStop(0.5, '#22d3ee');
-            grad.addColorStop(1, '#0e7490');
-            ctx.fillStyle = grad;
+            radGrd.addColorStop(0, '#ffffff');
+            radGrd.addColorStop(0.5, '#bae6fd');
+            radGrd.addColorStop(1, '#0284c7');
+            ctx.fillStyle = radGrd;
 
             ctx.beginPath();
-            ctx.arc(player.x + player.width/2, player.y + player.height/2, player.width/2 + 2, 0, Math.PI * 2);
+            ctx.arc(player.x + player.width/2, player.y + player.height/2, player.width/2, 0, Math.PI * 2);
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Draw Noor eyes based on expressions state
+            // Expressive Eyes
             ctx.fillStyle = '#0f172a';
-            let lookX = player.dir === 'left' ? -2 : 2;
+            let eyeLook = player.dir === 'left' ? -3 : 3;
             ctx.beginPath();
-            
-            if (player.faceState === 'happy') {
-                ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(player.x + player.width/2 + lookX - 2, player.y + player.height/2, 2, Math.PI, 0);
-                ctx.arc(player.x + player.width/2 + lookX + 2, player.y + player.height/2, 2, Math.PI, 0);
-                ctx.stroke();
-            } else if (player.faceState === 'falling') {
-                ctx.arc(player.x + player.width/2 + lookX - 2, player.y + player.height/2, 2.2, 0, Math.PI * 2);
-                ctx.arc(player.x + player.width/2 + lookX + 2, player.y + player.height/2, 2.2, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                ctx.arc(player.x + player.width/2 + lookX - 2, player.y + player.height/2, 1.5, 0, Math.PI * 2);
-                ctx.arc(player.x + player.width/2 + lookX + 2, player.y + player.height/2, 1.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            ctx.arc(player.x + player.width/2 + eyeLook - 2, player.y + player.height/2 - 1, 2, 0, Math.PI * 2);
+            ctx.arc(player.x + player.width/2 + eyeLook + 3, player.y + player.height/2 - 1, 2, 0, Math.PI * 2);
+            ctx.fill();
 
             ctx.restore();
-            ctx.restore(); 
         }
 
-        // Continual loop processor safely bypasses dialogue blocks without breaking
+        // Main animation scheduler (Guarantees uninterrupted play)
         function gameLoop() {
-            if (isPlaying && !isGameOver) {
-                updatePhysics();
-                updateEntities();
-            }
+            updatePhysics();
+            updateEntities();
             drawGame();
-            animationFrameId = requestAnimationFrame(gameLoop);
+            requestAnimationFrame(gameLoop);
         }
 
-        // Run UI mapping on bootup
-        renderProgressGrid();
-        setDifficulty('medium');
+        // Win or Lose Trigger
+        function triggerEnd(isVictory) {
+            isPlaying = false;
+            isGameOver = true;
+            document.getElementById('endOverlay').classList.remove('hidden');
+
+            const title = document.getElementById('endTitle');
+            const desc = document.getElementById('endDesc');
+            const icon = document.getElementById('endIcon');
+            const primaryBtn = document.getElementById('endPrimaryBtn');
+
+            document.getElementById('endScore').innerText = `${100 - stressIndex}%`;
+            document.getElementById('endAltitude').innerText = `${Math.floor((WORLD_HEIGHT - player.y)/10)}م`;
+
+            if (isVictory) {
+                icon.innerText = "🌟🏆🔑";
+                title.innerText = "تم اجتياز الفصل بنجاح!";
+                title.className = "text-xl font-black text-emerald-400 mb-1";
+                desc.innerText = "لقد حافظت نور على تماسكها وسلامة البيانات وقادت الفريق بحكمة واحترافية.";
+                
+                // Progress Unlock
+                if (currentLevel === maxUnlockedLevel && currentLevel < 5) {
+                    maxUnlockedLevel++;
+                    localStorage.setItem('noor_unlocked_level', maxUnlockedLevel);
+                }
+                
+                primaryBtn.innerText = "بدء المرحلة التالية 🚀";
+                playSound('victory');
+            } else {
+                icon.innerText = "👾⚠️💔";
+                title.innerText = "انهارت طاقة نور!";
+                title.className = "text-xl font-black text-rose-500 mb-1";
+                desc.innerText = "تراكم الاحتراق المهني والضغوط حتى انهار النظام. خذ نفساً عميقاً وأعد تهيئة المحاكاة.";
+                primaryBtn.innerText = "إعادة المحاولة مجدداً 🔄";
+                playSound('damage');
+            }
+        }
+
+        function nextLevelOrRestart() {
+            document.getElementById('endOverlay').classList.add('hidden');
+            if (stressIndex >= 100) {
+                // Re-init current level
+                initLevel();
+            } else {
+                // Next level increment
+                if (currentLevel < 5) {
+                    currentLevel++;
+                    initLevel();
+                } else {
+                    // Story Finish
+                    alert("لقد أتممت صعود لوحة البيانات وحققت استقرار نور بنجاح تام! رائع!");
+                    currentLevel = 1;
+                    initLevel();
+                }
+            }
+        }
+
+        // Boot-up First Frame Render
         drawGame();
     </script>
 </body>
