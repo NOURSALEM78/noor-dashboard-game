@@ -1,1481 +1,1462 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>نور: صعود لوحة البيانات</title>
+  
+  <!-- استدعاء خطوط وأيقونات ومكتبات التنسيق -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
 
-const WORLD_WIDTH = 480;
-const WORLD_HEIGHT = 1800;
-
-const STAGES = [
-  { id: 1, title: 'تسجيل الدخول', chapter: 'الفصل الأول: الصدمة الأولى', desc: 'نور تدخل النظام المركزي المتهالك. تعلم الحركة وتفادى كتل الفيروسات الأولى والاندفاع السريع.', objType: 'collect', target: 3, objective: 'جمع 3 رموز أمان للتحقق من الاتصال (اضغط Shift للاندفاع!)', color: 'rgba(56, 189, 248, 0.4)' },
-  { id: 2, title: 'فيض المهام المتراكمة', chapter: 'الفصل الأول: الصدمة الأولى', desc: 'تراكم إشعارات المهام يضيق الخناق على نور. احترس من المنصات التالفة وثقوب الجاذبية الجديدة!', objType: 'collect', target: 5, objective: 'جمع 5 حزم توازن وتفادي ثقوب الجاذبية الدوارة', color: 'rgba(56, 189, 248, 0.4)' },
-  { id: 3, title: 'الخطأ البرمجي الحرج', chapter: 'الفصل الأول: الصدمة الأولى', desc: 'انهيار البنية التحتية! اهزم شلال الأخطاء (Error Cascade) المتجسد في القمة مع عاصفة الأخطاء المتساقطة.', objType: 'boss', target: 1, objective: 'الوصول للقمة وهزيمة وحش الأخطاء البرمجية', color: 'rgba(239, 68, 68, 0.4)' },
-  { id: 4, title: 'إدارة تماسك الفريق', chapter: 'الفصل الثاني: الجميع يعتمد عليّ', desc: 'الفريق يعاني من تشتت وأزمات تواصل. تواصل معهم وساعدهم لتأمين بيئة تشغيل آمنة.', objType: 'team', target: 3, objective: 'مصافحة والاجتماع بـ 3 زملاء لتأمين الثقة', color: 'rgba(192, 132, 252, 0.4)' },
-  { id: 5, title: 'الاجتماع التنفيذي المصيري', chapter: 'الفصل الثاني: الجميع يعتمد عليّ', desc: 'المدراء يضغطون لإطلاق سريع حرج. تفاوض مع م. ناصر وأ. منيرة بحكمة لتفادي عواصف الرأي.', objType: 'executive', target: 2, objective: 'حل الصراع الحواري مع المسؤولين في مجلس الإدارة', color: 'rgba(192, 132, 252, 0.4)' },
-  { id: 6, title: 'حافة الاحتراق النفسي', chapter: 'الفصل الثاني: الجميع يعتمد عليّ', desc: 'الجاذبية تنهار وتتحرك الليزرات بعنف مع شذوذ الجاذبية الدوارة. اهزم تجسيد الضغوط (Burnout.exe).', objType: 'boss', target: 1, objective: 'القضاء على تجسيد الاحتراق النفسي بنجاح', color: 'rgba(239, 68, 68, 0.4)' },
-  { id: 7, title: 'شاشة التزييف والمؤشرات', chapter: 'الفصل الثالث: خلف الكواليس', desc: 'اكتشاف تلاعب بالبيانات. اجمع المؤشرات الحقيقية (الخضراء) وابتعد عن المزيفة ولا تدع العواصف تعيقك.', objType: 'metrics', target: 5, objective: 'جمع 5 مؤشرات حقيقية (خضراء) فقط وتجنب الخداع', color: 'rgba(234, 179, 8, 0.4)' },
-  { id: 8, title: 'صراع الموارد والأقسام', chapter: 'الفصل الثالث: خلف الكواليس', desc: 'صراع شديد بين فريق المبيعات والامتثال الأمني. وازن مصالحهم وتفادى شذوذ البيانات الجاذب.', objType: 'conflict', target: 1, objective: 'موازنة مصالح الأقسام في لوحة التحكم', color: 'rgba(234, 179, 8, 0.4)' },
-  { id: 9, title: 'الحقيقة الصادمة للبيانات', chapter: 'الفصل الثالث: خلف الكواليس', desc: 'النظام مبرمج لاستنزاف البشر. دمر محرك الضغط المركزي Core Engine لتحرير نور وسط عواصف الحمولة الحرة.', objType: 'boss', target: 1, objective: 'مواجهة وتطهير محرك الضغط المركزي Core Engine', color: 'rgba(239, 68, 68, 0.4)' },
-  { id: 10, title: 'الصمت والسكينة', chapter: 'الفصل الرابع: القمة الهادئة', desc: 'الفصل الختامي. صعود أخير هادئ نحو العثور على الذات بعيداً عن ضجيج الأرقام والـ KPIs والضغوطات.', objType: 'silence', target: 1, objective: 'الوصول لمرآة النور واتخاذ القرار المصيري الختامي', color: 'rgba(255, 255, 255, 0.4)' }
-];
-
-const SafeStorage = {
-  get: (key, def) => { try { const v = localStorage.getItem(key); return v !== null ? v : def; } catch { return def; } },
-  set: (key, val) => { try { localStorage.setItem(key, val); } catch {} }
-};
-
-const AudioSynth = (() => {
-  let actx = null;
-  const init = () => {
-    if (actx) return;
-    try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
-  };
-  const play = (type, muted) => {
-    init();
-    if (!actx || muted) return;
-    if (actx.state === 'suspended') actx.resume();
-    try {
-      const osc = actx.createOscillator();
-      const gain = actx.createGain();
-      osc.connect(gain); gain.connect(actx.destination);
-      const now = actx.currentTime;
-      if (type === 'jump') {
-        osc.type = 'triangle'; osc.frequency.setValueAtTime(140, now); osc.frequency.exponentialRampToValueAtTime(350, now + 0.15);
-        gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-        osc.start(now); osc.stop(now + 0.15);
-      } else if (type === 'dash') {
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.12);
-        gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-        osc.start(now); osc.stop(now + 0.12);
-      } else if (type === 'collect') {
-        osc.type = 'sine'; osc.frequency.setValueAtTime(320, now); osc.frequency.setValueAtTime(540, now + 0.08);
-        gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-        osc.start(now); osc.stop(now + 0.22);
-      } else if (type === 'damage') {
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(90, now); osc.frequency.linearRampToValueAtTime(30, now + 0.3);
-        gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now); osc.stop(now + 0.3);
-      } else if (type === 'success') {
-        osc.type = 'sine'; osc.frequency.setValueAtTime(260, now); osc.frequency.setValueAtTime(390, now + 0.1); osc.frequency.setValueAtTime(520, now + 0.2);
-        gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc.start(now); osc.stop(now + 0.4);
-      }
-    } catch {}
-  };
-  return { play };
-})();
-
-export default function App() {
-  const canvasRef = useRef(null);
-
-  // واجهات تفاعل المستخدم
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [showPause, setShowPause] = useState(false);
-  const [showDialogue, setShowDialogue] = useState(false);
-  const [showSensory, setShowSensory] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [difficulty, setDifficultyState] = useState('medium');
-  const [showVictory, setShowVictory] = useState(false);
-
-  // تحديثات شاشة العرض (HUD)
-  const [hudStageTitle, setHudStageTitle] = useState('');
-  const [hudObjectiveText, setHudObjectiveText] = useState('');
-  const [hudObjectiveProgress, setHudObjectiveProgress] = useState('0 / 3');
-  const [stressDisplay, setStressDisplay] = useState(40);
-  const [sidebarHtml, setSidebarHtml] = useState('');
-  const [logLines, setLogLines] = useState(['> تم تهيئة الاتصال بنظام لوحة البيانات الوطنية المتطور.']);
-  const [dialogueData, setDialogueData] = useState(null);
-  const [unlockedLevel, setUnlockedLevel] = useState(() => parseInt(SafeStorage.get('noor_unlocked_level', '1')));
-  const [selectedLevel, setSelectedLevel] = useState(1);
-  const [pauseObjective, setPauseObjective] = useState('');
-
-  // العداد المباشر لتبريد الاندفاع على الشاشة
-  const [dashCooldownPercent, setDashCooldownPercent] = useState(0);
-
-  // الكومبو الحالي
-  const [comboCount, setComboCount] = useState(0);
-
-  // كائن اللعبة المتغير في الخلفية
-  const G = useRef({
-    isPlaying: false,
-    isPaused: false,
-    currentLevel: 1,
-    difficulty: 'medium',
-    gravity: 0.42,
-    jumpStrength: -11.0,
-    moveSpeed: 4.5,
-    platformGap: 110,
-    screenShake: 0,
-    stressIndex: 40,
-    objectiveCollected: 0,
-    cameraY: WORLD_HEIGHT - 600,
-    scale: 1,
-    // خصائص نور المطورة (الاتجاه، الاندفاع، وشاح الحركة، الجسيمات)
-    player: {
-      x: WORLD_WIDTH / 2,
-      y: WORLD_HEIGHT - 120,
-      width: 28,
-      height: 38,
-      vx: 0,
-      vy: 0,
-      faceDir: 1, // 1 يمين، -1 يسار
-      isGrounded: false,
-      doubleJump: true,
-      pulse: 0,
-      dashCooldown: 0,
-      dashTimer: 0,
-      dashTrail: [],
-      scarfPoints: [], // للنظام الفيزيائي للوشاح
-    },
-    platforms: [],
-    items: [],
-    enemies: [],
-    lasers: [],
-    bgCodes: [],
-    boss: null,
-    bossProjectiles: [],
-    playerProjectiles: [],
-    keys: {},
-    touchLeft: false,
-    touchRight: false,
-    // التحديات الجديدة ممتعة
-    gravityWells: [], // ثقوب الجاذبية السيبرانية
-    fallingErrors: [], // الأخطاء المتساقطة
-    stormTimer: 0, // توقيت العواصف العشوائية
-    isStormActive: false,
-    comboTimer: 0,
-    comboMultiplier: 0,
-  });
-
-  const pendingDialogue = useRef(null);
-  const isMutedRef = useRef(false);
-
-  const logEvent = useCallback((text, type = 'info') => {
-    const color = type === 'success' ? '#34d399' : type === 'error' ? '#f87171' : type === 'warning' ? '#fbbf24' : '#c084fc';
-    setLogLines(prev => [...prev.slice(-40), `<span style="color:${color}">> ${text}</span>`]);
-  }, []);
-
-  const syncHUD = useCallback(() => {
-    const g = G.current;
-    const stage = STAGES[g.currentLevel - 1];
-    setHudStageTitle(`${stage.chapter} • ${stage.title}`);
-    setHudObjectiveText(stage.objective);
-    setHudObjectiveProgress(`${g.objectiveCollected} / ${stage.target}`);
-    setStressDisplay(g.stressIndex);
-
-    const diff = g.difficulty;
-    const diffLabel = diff === 'easy' ? 'مستقر (بيئة مريحة)' : diff === 'medium' ? 'مضغوط (بيئة عمل روتينية)' : 'حرج (إطلاق سريع ومكثف)';
-    setSidebarHtml(`
-      <div style="display:flex;justify-content:space-between;padding:4px 0"><span>وضع الضغط:</span><span style="color:#38bdf8;font-weight:bold">${diffLabel}</span></div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #1e293b"><span>الرموز المجمعة:</span><span>${g.objectiveCollected} / ${stage.target}</span></div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #1e293b"><span>مؤشر التوتر النفسي:</span><span style="font-weight:bold;color:${g.stressIndex > 72 ? '#f87171' : '#34d399'}">${g.stressIndex}%</span></div>
-      <p style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.5;border-top:1px solid #1e293b;padding-top:6px;text-align:right">${stage.desc}</p>
-    `);
-  }, []);
-
-  const applyDifficulty = useCallback((lvl) => {
-    const g = G.current;
-    g.difficulty = lvl;
-    if (lvl === 'easy') { g.gravity = 0.38; g.jumpStrength = -10.5; g.moveSpeed = 4.2; g.platformGap = 95; }
-    else if (lvl === 'medium') { g.gravity = 0.42; g.jumpStrength = -11.0; g.moveSpeed = 4.6; g.platformGap = 115; }
-    else { g.gravity = 0.46; g.jumpStrength = -12.0; g.moveSpeed = 5.2; g.platformGap = 135; }
-    setDifficultyState(lvl);
-  }, []);
-
-  const buildWorld = useCallback(() => {
-    const g = G.current;
-    const canvas = canvasRef.current;
-    g.platforms = []; g.items = []; g.enemies = []; g.lasers = []; g.bgCodes = [];
-    g.bossProjectiles = []; g.playerProjectiles = []; g.boss = null;
-    g.gravityWells = []; g.fallingErrors = []; g.objectiveCollected = 0;
-    g.isStormActive = false; g.stormTimer = 0; g.comboMultiplier = 0;
-
-    const stage = STAGES[g.currentLevel - 1];
-
-    // نصوص خلفية معبرة عن لغات البرمجة والـ KPIs
-    const techWords = ['KPI', 'STRESS', 'BUG_404', 'COMPLY_SECURITY', 'DB_LOCKED', 'COMMIT_PROD', 'BURNOUT_EXP'];
-    for (let i = 0; i < 35; i++) {
-      g.bgCodes.push({
-        x: Math.random() * WORLD_WIDTH,
-        y: Math.random() * WORLD_HEIGHT,
-        txt: Math.random() > 0.4 ? techWords[Math.floor(Math.random() * techWords.length)] : (Math.random() > 0.5 ? '1' : '0'),
-        alpha: Math.random() * 0.12 + 0.04,
-        size: Math.floor(Math.random() * 5) + 11
-      });
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #020617;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
     }
-
-    // منصة البداية الأرضية
-    g.platforms.push({ x: 0, y: WORLD_HEIGHT - 60, width: WORLD_WIDTH, height: 60, type: 'base', title: 'خادم قواعد البيانات المحلي الآمن', shake: 0 });
-
-    // تفعيل شذوذ الجاذبية (Gravity Wells) في مستويات معينة لزيادة المتعة والتحدي
-    if (g.currentLevel >= 2) {
-      g.gravityWells.push({ x: WORLD_WIDTH * 0.25, y: WORLD_HEIGHT - 500, radius: 45, pullStrength: 0.15, rotation: 0 });
-      g.gravityWells.push({ x: WORLD_WIDTH * 0.75, y: WORLD_HEIGHT - 1100, radius: 45, pullStrength: 0.15, rotation: 1.5 });
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #020617;
     }
-
-    if (stage.objType === 'boss') {
-      g.boss = { x: WORLD_WIDTH / 2 - 50, y: 180, width: 100, height: 50, health: 100, maxHealth: 100, shootTimer: 0, pulse: 0, dir: 1 };
-      logEvent("رصد نشاط مدمر للبنية التحتية! تجسد وحش الضغوطات في القمة!", "error");
+    @media (min-width: 1024px) {
+      .lg-sidebar { display: flex !important; }
     }
-
-    let currentY = WORLD_HEIGHT - 170;
-    let lastX = WORLD_WIDTH / 2 - 80;
-
-    // بناء المنصات والعقبات بشكل عمودي
-    while (currentY > 250) {
-      const width = 160;
-      const minX = Math.max(20, lastX - 120);
-      const maxX = Math.min(WORLD_WIDTH - width - 20, lastX + 120);
-      const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
-
-      let type = 'bar';
-      let isCollapsible = false;
-      if (Math.random() > 0.75 && g.currentLevel >= 2) { type = 'collapsible'; isCollapsible = true; }
-      else if (Math.random() > 0.82) { type = 'gauge'; }
-
-      g.platforms.push({
-        x, y: currentY, width, height: 28, type,
-        title: isCollapsible ? 'أولوية KPI غير مستقرة' : `سجل مراجعة #${Math.floor(currentY / 10)}`,
-        isMoving: Math.random() > 0.55 && g.currentLevel > 1,
-        moveSpeed: Math.random() * 1.2 + 0.5,
-        dir: Math.random() > 0.5 ? 1 : -1,
-        rangeX: [Math.max(10, x - 60), Math.min(WORLD_WIDTH - width - 10, x + 60)],
-        collapseTimer: 90, hasCollapsed: false, isStoodOn: false, shake: 0
-      });
-
-      // عقبات ليزر دورية
-      if (Math.random() > 0.76 && g.currentLevel >= 2 && currentY < WORLD_HEIGHT - 300) {
-        g.lasers.push({ y: currentY + 50, h: 4, active: true, timer: Math.random() * 120 });
-      }
-      // فيروسات متحركة دفاعية
-      if (Math.random() > 0.68 && g.currentLevel >= 2 && currentY < WORLD_HEIGHT - 300) {
-        g.enemies.push({ x: x + 20, y: currentY - 26, width: 26, height: 22, vx: Math.random() * 0.9 + 0.6, minX: x + 10, maxX: x + width - 36, pulse: Math.random() * 5 });
-      }
-
-      // توليد حزم الأهداف الأمنية والرموز
-      if ((stage.objType === 'collect' || stage.objType === 'metrics' || stage.objType === 'boss') && Math.random() > 0.35 && g.items.length < stage.target) {
-        g.items.push({ x: x + width / 2, y: currentY - 26, width: 20, height: 20, type: stage.objType === 'boss' ? 'security_patch' : (stage.objType === 'metrics' ? 'green_metric' : 'token'), pulse: Math.random() * 5 });
-      }
-      if (stage.objType === 'metrics' && Math.random() > 0.55) {
-        g.items.push({ x: x + 25, y: currentY - 24, width: 18, height: 18, type: 'red_metric', pulse: Math.random() * 5 });
-      }
-      if (stage.objType === 'team' && Math.random() > 0.5 && g.items.length < stage.target) {
-        g.items.push({ x: x + width / 2, y: currentY - 34, width: 22, height: 34, type: 'team_npc', name: `مطور #${g.items.length + 1}`, resolved: false });
-      }
-      if (stage.objType === 'executive') {
-        if (currentY < WORLD_HEIGHT - 300 && currentY > WORLD_HEIGHT - 700 && !g.items.some(i => i.name === 'م. ناصر')) {
-          g.items.push({ x: x + 40, y: currentY - 34, width: 22, height: 34, type: 'board_npc', name: 'م. ناصر', title: 'رئيس قطاع التشغيل', resolved: false });
-        }
-        if (currentY < WORLD_HEIGHT - 1000 && currentY > WORLD_HEIGHT - 1400 && !g.items.some(i => i.name === 'أ. منيرة')) {
-          g.items.push({ x: x + 40, y: currentY - 34, width: 22, height: 34, type: 'board_npc', name: 'أ. منيرة', title: 'مديرة الموارد البشرية', resolved: false });
-        }
-      }
-
-      lastX = x;
-      currentY -= g.platformGap;
+    /* تأثير نبض النور لشاشات النصر والترحيب */
+    @keyframes pulse-glow {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
+    .victory-pulse {
+      animation: pulse-glow 2s infinite;
+    }
+    /* إخفاء شريط التمرير الافتراضي لسجلات اللعب */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.1);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="w-screen h-screen flex flex-col text-slate-100">
 
-    // القمة الرقمية النهائية للعبور
-    g.platforms.push({ x: WORLD_WIDTH / 2 - 110, y: 150, width: 220, height: 40, type: 'summit', title: 'بوابة النقل والاتصال المركزي (API Central)' });
-    g.items.push({ x: WORLD_WIDTH / 2, y: 110, width: 28, height: 28, type: 'summit_gateway' });
+  <header class="bg-slate-950/98 border-b border-sky-500/15 p-2 px-3 flex justify-between items-center z-30 shrink-0 gap-2">
+    <div class="flex items-center gap-2 flex-1 min-w-0">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500/20 to-indigo-500/20 border border-sky-500/40 flex items-center justify-center text-sky-300 font-black text-sm shrink-0 shadow-lg shadow-sky-500/10">ن</div>
+      <div class="min-w-0">
+        <h1 class="text-xs font-black text-sky-400 tracking-wide m-0 truncate" style="text-shadow: 0 0 8px rgba(56,189,248,0.4)">نور: صعود لوحة البيانات</h1>
+        <p id="hud-stage-title" class="text-[9px] text-slate-500 m-0 truncate">تحميل القطاع...</p>
+      </div>
+    </div>
+    
+    <!-- مؤشر التراكم النفسي والتوتر للبطلة -->
+    <div class="flex flex-col items-center gap-1 shrink-0">
+      <div class="flex items-center gap-1.5">
+        <span class="text-[8px] text-rose-400 font-bold">التراكم النفسي</span>
+        <span id="hud-stress-val" class="text-xs font-black text-emerald-400">40%</span>
+      </div>
+      <div class="w-16 bg-slate-900 rounded-full h-1.5 overflow-hidden border border-sky-500/10">
+        <div id="hud-stress-bar" class="w-2/5 h-full bg-emerald-500 transition-all duration-300 rounded-full"></div>
+      </div>
+    </div>
 
-    // تجهيز حالة اللاعب فيزيائياً وتهيئة وشاح الحركة المطور
-    g.player = {
-      x: WORLD_WIDTH / 2,
-      y: WORLD_HEIGHT - 130,
-      width: 28,
-      height: 38,
-      vx: 0,
-      vy: 0,
-      faceDir: 1,
-      isGrounded: false,
-      doubleJump: true,
-      pulse: 0,
-      dashCooldown: 0,
-      dashTimer: 0,
-      dashTrail: [],
-      scarfPoints: Array.from({ length: 6 }, (_, i) => ({ x: WORLD_WIDTH / 2, y: WORLD_HEIGHT - 130 + i * 4 }))
+    <!-- أزرار كتم الصوت والتحكم -->
+    <div class="flex gap-1.5 shrink-0">
+      <button id="btn-mute" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center cursor-pointer transition-colors hover:bg-slate-800">
+        <i class="fa-solid fa-volume-high text-sky-400 text-xs"></i>
+      </button>
+      <button id="btn-pause" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center cursor-pointer text-slate-500 transition-colors hover:bg-slate-800">
+        <i class="fa-solid fa-pause text-xs text-sky-400"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 flex overflow-hidden relative">
+    
+    <!-- بيئة اللعب وبنية الكانفاس الحركية -->
+    <div class="flex-1 h-full relative overflow-hidden flex flex-col">
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- مؤشر الأهداف العلوية النشطة ونظام الكومبو -->
+      <div class="absolute top-3 right-3 z-10 max-w-[195px] pointer-events-none flex flex-col gap-1.5">
+        <div id="hud-combo-container" class="hidden bg-gradient-to-r from-pink-500 to-violet-600 border border-white/20 rounded-lg p-1 px-2.5 flex justify-between items-center animate-bounce">
+          <span class="text-[9px] font-black text-white">كومبو حماسي!</span>
+          <span id="hud-combo-val" class="text-xs font-black text-white">x2</span>
+        </div>
+        <div class="bg-slate-950/80 backdrop-blur-md border border-sky-500/20 rounded-xl p-2 px-3 shadow-lg">
+          <div class="flex justify-between items-center mb-1 gap-4">
+            <span class="text-[9px] text-sky-400 font-extrabold">المهمة الحالية</span>
+            <span id="hud-progress-val" class="text-[10px] font-black text-sky-300 bg-sky-500/10 p-0.5 px-2 rounded-full border border-sky-500/20">0 / 3</span>
+          </div>
+          <p id="hud-objective-text" class="text-[10px] text-slate-200 leading-normal m-0"></p>
+        </div>
+      </div>
+
+      <!-- زر الحواس السيكولوجية والذكريات -->
+      <button id="btn-sensory" class="absolute top-3 left-3 z-10 w-9 h-9 rounded-xl bg-slate-900/80 backdrop-blur border border-purple-500/30 flex items-center justify-center text-purple-400 cursor-pointer shadow-lg shadow-purple-500/10 transition-transform active:scale-95">
+        <i class="fa-solid fa-brain text-sm"></i>
+      </button>
+
+      <div class="absolute bottom-0 left-0 right-0 z-20 p-3 pb-5 bg-gradient-to-t from-slate-950/98 via-slate-950/60 to-transparent pointer-events-none">
+        <div class="flex justify-between items-end pointer-events-none">
+          
+          <!-- أزرار التوجيه الجانبي اليسرى -->
+          <div class="flex gap-2.5 pointer-events-auto">
+            <button id="ctrl-left" class="w-16 h-16 rounded-2xl bg-slate-900/90 backdrop-blur border-2 border-sky-500/35 flex items-center justify-center text-sky-400 text-xl cursor-pointer shadow-lg active:bg-sky-500/15">
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button id="ctrl-right" class="w-16 h-16 rounded-2xl bg-slate-900/90 backdrop-blur border-2 border-sky-500/35 flex items-center justify-center text-sky-400 text-xl cursor-pointer shadow-lg active:bg-sky-500/15">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+          </div>
+
+          <!-- أزرار الإجراءات الخاصة بالاندفاع والقفز -->
+          <div class="flex gap-3 items-center pointer-events-auto">
+            <button id="ctrl-dash" class="w-14 h-14 rounded-full bg-slate-900 border-2 border-purple-500/35 flex flex-col items-center justify-center text-white cursor-pointer shadow-lg active:bg-purple-500/15">
+              <i class="fa-solid fa-bolt text-sm text-purple-400"></i>
+              <span id="ctrl-dash-cooldown" class="text-[8px] font-extrabold text-purple-300">اندفاع</span>
+            </button>
+            <button id="ctrl-jump" class="w-[74px] h-[74px] rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-white text-2xl border-2 border-white/20 cursor-pointer shadow-xl shadow-sky-500/30 active:scale-95">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- الشريط الجانبي الفني لشاشات الحاسب الكبيرة -->
+    <aside class="hidden w-80 bg-slate-900/95 border-r border-sky-500/10 p-4 flex-col gap-4 overflow-y-auto shrink-0 lg-sidebar">
+      <div class="p-3 bg-gradient-to-br from-slate-800 to-slate-950 rounded-xl border border-sky-500/20 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-sky-500/10 border-2 border-sky-400 flex items-center justify-center text-lg">💡</div>
+        <div>
+          <h3 class="font-bold text-sky-300 text-sm m-0">نور: قائدة البيانات</h3>
+          <p class="text-[10px] text-slate-400 m-0">مواجهة ضغوط التحول الرقمي</p>
+        </div>
+      </div>
+      <div class="bg-slate-900/80 border border-sky-500/25 rounded-xl p-3 flex-1">
+        <span class="text-[10px] text-slate-400 font-bold block mb-2 tracking-wider">الأهداف الحالية للمرحلة</span>
+        <div id="sidebar-objectives" class="text-xs text-slate-300 leading-relaxed text-right"></div>
+      </div>
+      <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+        <span class="text-[9px] font-bold text-sky-500 block mb-1.5 font-mono">> السجل السيكولوجي (Stress Log)</span>
+        <div id="sidebar-logs" class="text-[9px] font-mono text-slate-400 h-24 overflow-y-auto flex flex-col gap-1 custom-scrollbar"></div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="welcome-overlay" class="fixed inset-0 bg-slate-950/97 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-[480px] bg-gradient-to-b from-slate-900 to-slate-950 border border-sky-500/20 rounded-3xl p-5 text-right shadow-2xl">
+      <div class="text-center mb-5">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500/20 to-indigo-500/20 border border-sky-500/40 flex items-center justify-center text-2xl mx-auto mb-3 shadow-lg shadow-sky-500/10">💡</div>
+        <h2 class="text-xl font-black bg-gradient-to-l from-sky-400 to-indigo-400 bg-clip-text text-transparent m-0 mb-1.5">نور: صعود لوحة البيانات</h2>
+        <p class="text-xs text-slate-400 m-0 leading-relaxed">العب بالبطلة نور ووشاحها المتدفق وتفادى ثقوب الجاذبية والاندفاع لتجاوز الأخطاء السلوكية والضغوط!</p>
+      </div>
+
+      <!-- اختيار مستوى الصعوبة -->
+      <div class="mb-4">
+        <span class="text-[10px] font-extrabold text-sky-400 block mb-2.5">مستوى الضغط السلوكي (الصعوبة):</span>
+        <div class="grid grid-cols-3 gap-2">
+          <button id="diff-easy" class="diff-btn p-2 rounded-xl border border-slate-800 bg-slate-900/50 text-slate-500 font-bold text-xs cursor-pointer transition-all" onclick="selectDifficulty('easy')">
+            <div class="text-sm mb-0.5">🟢</div>
+            <div class="font-extrabold text-[10px]">مستقر</div>
+            <div class="text-[8px] opacity-70">سهل</div>
+          </button>
+          <button id="diff-medium" class="diff-btn p-2 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-300 font-bold text-xs cursor-pointer transition-all" onclick="selectDifficulty('medium')">
+            <div class="text-sm mb-0.5">🟡</div>
+            <div class="font-extrabold text-[10px]">مضغوط</div>
+            <div class="text-[8px] opacity-70">متوسط</div>
+          </button>
+          <button id="diff-hard" class="diff-btn p-2 rounded-xl border border-slate-800 bg-slate-900/50 text-slate-500 font-bold text-xs cursor-pointer transition-all" onclick="selectDifficulty('hard')">
+            <div class="text-sm mb-0.5">🔴</div>
+            <div class="font-extrabold text-[10px]">حرج</div>
+            <div class="text-[8px] opacity-70">صعب</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- شبكة المراحل والقطاعات للعبور -->
+      <div class="bg-black/30 p-2.5 rounded-2xl border border-white/5 mb-5">
+        <span class="text-[10px] font-extrabold text-sky-400 block mb-2">اختر المرحلة ومسار الأزمة:</span>
+        <div id="stages-grid" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto custom-scrollbar p-1"></div>
+      </div>
+
+      <button id="btn-launch" class="w-full py-3.5 bg-gradient-to-l from-sky-500 to-indigo-600 rounded-2xl font-black text-white text-sm cursor-pointer shadow-xl shadow-sky-500/25 active:scale-95 transition-transform border-0">
+        ⚡ تشغيل وتهيئة المحاكاة
+      </button>
+    </div>
+  </div>
+
+  <div id="pause-overlay" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+    <div class="w-full max-w-[360px] bg-slate-900 border border-slate-800 rounded-3xl p-5 text-right shadow-2xl">
+      <h3 class="font-bold text-base text-slate-200 mb-2 flex items-center justify-end gap-2">
+        لوحة التحكم وخيارات الجولة <i class="fa-solid fa-gear text-sky-400"></i>
+      </h3>
+      <p class="text-[10px] text-slate-400 mb-4">أوقف الصعود لتعديل مستوى الضغط الحالي ومراجعة متطلبات قطاعك الحالي.</p>
+      
+      <div class="mb-4">
+        <span class="text-[10px] text-slate-400 block mb-2">تعديل مؤشر الضغط فوراً:</span>
+        <div class="flex gap-2">
+          <button class="flex-1 py-2 rounded-lg bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-400 cursor-pointer" onclick="rebuildWithDiff('easy')">مستقر</button>
+          <button class="flex-1 py-2 rounded-lg bg-sky-500/10 border border-sky-500/40 text-[10px] font-bold text-sky-300 cursor-pointer" onclick="rebuildWithDiff('medium')">مضغوط</button>
+          <button class="flex-1 py-2 rounded-lg bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-400 cursor-pointer" onclick="rebuildWithDiff('hard')">حرج</button>
+        </div>
+      </div>
+
+      <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 mb-4">
+        <span class="text-[9px] text-sky-400 font-bold block">المطلوب لإصلاح هذا القطاع:</span>
+        <p id="pause-objective-text" class="text-[10px] text-slate-300 m-0 mt-1"></p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <button id="btn-resume" class="py-2.5 bg-sky-500 text-slate-950 rounded-xl font-bold text-xs cursor-pointer border-0">العودة لمتابعة الصعود</button>
+        <button id="btn-abort" class="py-2.5 bg-slate-800 border border-slate-700 rounded-xl font-bold text-xs text-slate-400 cursor-pointer">إنهاء الجولة والعودة للرئيسية</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="dialogue-overlay" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 flex items-end justify-center p-4">
+    <div class="w-full max-w-[512px] bg-slate-900/95 border border-purple-500/30 rounded-2xl p-5 text-right shadow-2xl">
+      <span class="bg-purple-500 text-slate-950 text-[9px] font-black p-1 px-3 rounded-full inline-block mb-2">مداولة تشغيلية حاسمة</span>
+      <div class="flex items-center gap-3 mb-3 border-b border-slate-800 pb-2">
+        <div class="flex-1">
+          <h4 id="dialogue-npc-name" class="font-bold text-purple-400 text-xs m-0">ناصر</h4>
+          <p id="dialogue-npc-title" class="text-[9px] text-slate-400 m-0">رئيس قطاع التشغيل</p>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-base">👤</div>
+      </div>
+      <p id="dialogue-text" class="text-xs text-slate-200 leading-relaxed mb-4"></p>
+      <div id="dialogue-options" class="flex flex-col gap-2"></div>
+    </div>
+  </div>
+
+  <!-- شاشة سجل الحواس والذكريات المنبثقة للقصة -->
+  <div id="sensory-overlay" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-35 flex items-center justify-center p-4">
+    <div class="w-full max-w-[320px] bg-slate-900 border border-purple-500/30 rounded-3xl p-4 text-right relative">
+      <button id="btn-close-sensory" class="absolute top-3 left-3 w-8 h-8 rounded-full bg-slate-800 border-0 flex items-center justify-center text-slate-400 cursor-pointer text-xs">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <h3 class="font-bold text-sm text-purple-400 mb-3 flex items-center justify-end gap-2">
+        سجل الحواس والذكريات <i class="fa-solid fa-brain"></i>
+      </h3>
+      <div id="sensory-content" class="max-h-60 overflow-y-auto mb-4 text-xs text-slate-300 leading-relaxed custom-scrollbar p-1"></div>
+      <button id="btn-dismiss-sensory" class="w-full py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-slate-400 cursor-pointer">إغلاق السجل</button>
+    </div>
+  </div>
+
+  <div id="victory-overlay" class="hidden fixed inset-0 bg-slate-950/96 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-[440px] bg-gradient-to-br from-slate-900 to-slate-950 border-2 border-emerald-500/35 rounded-3xl p-6 text-center shadow-2xl">
+      <div class="w-16 h-16 rounded-full bg-emerald-500/15 border-2 border-emerald-500 flex items-center justify-center text-3xl mx-auto mb-4 text-emerald-500 victory-pulse">🏆</div>
+      <h2 class="text-lg font-black text-emerald-500 m-0 mb-2">نصر كامل! تم التطهير التام</h2>
+      <p class="text-xs text-slate-400 leading-relaxed mb-5">
+        تهانينا الكبرى! لقد اجتزتِ كافة قطاعات لوحة البيانات بنجاح باهر! 
+        استطاعت نور الحفاظ على اتزانها، وحماية فريق العمل، وحل الأزمات الإدارية بحكمة واستعادة سكينتها بعيداً عن صخب الـ KPIs المفرط والاحتراق النفسي.
+      </p>
+      <div class="p-3 bg-black/40 rounded-2xl border border-emerald-500/20 mb-5">
+        <span class="text-[10px] text-emerald-400 font-extrabold block mb-1">الملف التوثيقي المنجز</span>
+        <p class="text-xs text-slate-200 m-0">تمت موازنة لوحة القيادة بنسبة حماية واستقرار كاملة 100%.</p>
+      </div>
+      <button id="btn-reset-game" class="w-full py-3 bg-gradient-to-l from-emerald-500 to-teal-600 border-0 rounded-2xl font-black text-white text-xs cursor-pointer shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform">
+        🔄 إعادة محاكاة الصعود من البداية
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const WORLD_WIDTH = 480;
+    const WORLD_HEIGHT = 1800;
+
+    const STAGES = [
+      { id: 1, title: 'تسجيل الدخول', chapter: 'الفصل الأول: الصدمة الأولى', desc: 'نور تدخل النظام المركزي المتهالك. تعلم الحركة وتفادى كتل الفيروسات الأولى والاندفاع السريع.', objType: 'collect', target: 3, objective: 'جمع 3 رموز أمان للتحقق من الاتصال (اضغط Shift للاندفاع!)', color: 'rgba(56, 189, 248, 0.4)' },
+      { id: 2, title: 'فيض المهام المتراكمة', chapter: 'الفصل الأول: الصدمة الأولى', desc: 'تراكم إشعارات المهام يضيق الخناق على نور. احترس من المنصات التالفة وثقوب الجاذبية الجديدة!', objType: 'collect', target: 5, objective: 'جمع 5 حزم توازن وتفادي ثقوب الجاذبية الدوارة', color: 'rgba(56, 189, 248, 0.4)' },
+      { id: 3, title: 'الخطأ البرمجي الحرج', chapter: 'الفصل الأول: الصدمة الأولى', desc: 'انهيار البنية التحتية! اهزم شلال الأخطاء (Error Cascade) المتجسد في القمة مع عاصفة الأخطاء المتساقطة.', objType: 'boss', target: 1, objective: 'الوصول للقمة وهزيمة وحش الأخطاء البرمجية', color: 'rgba(239, 68, 68, 0.4)' },
+      { id: 4, title: 'إدارة تماسك الفريق', chapter: 'الفصل الثاني: الجميع يعتمد عليّ', desc: 'الفريق يعاني من تشتت وأزمات تواصل. تواصل معهم وساعدهم لتأمين بيئة تشغيل آمنة.', objType: 'team', target: 3, objective: 'مصافحة والاجتماع بـ 3 زملاء لتأمين الثقة', color: 'rgba(192, 132, 252, 0.4)' },
+      { id: 5, title: 'الاجتماع التنفيذي المصيري', chapter: 'الفصل الثاني: الجميع يعتمد عليّ', desc: 'المدراء يضغطون لإطلاق سريع حرج. تفاوض مع م. ناصر وأ. منيرة بحكمة لتفادي عواصف الرأي.', objType: 'executive', target: 2, objective: 'حل الصراع الحواري مع المسؤولين في مجلس الإدارة', color: 'rgba(192, 132, 252, 0.4)' },
+      { id: 6, title: 'حافة الاحتراق النفسي', chapter: 'الفصل الثاني: الجميع يعتمد عليّ', desc: 'الجاذبية تنهار وتتحرك الليزرات بعنف مع شذوذ الجاذبية الدوارة. اهزم تجسيد الضغوط (Burnout.exe).', objType: 'boss', target: 1, objective: 'القضاء على تجسيد الاحتراق النفسي بنجاح', color: 'rgba(239, 68, 68, 0.4)' },
+      { id: 7, title: 'شاشة التزييف والمؤشرات', chapter: 'الفصل الثالث: خلف الكواليس', desc: 'اكتشاف تلاعب بالبيانات. اجمع المؤشرات الحقيقية (الخضراء) وابتعد عن المزيفة ولا تدع العواصف تعيقك.', objType: 'metrics', target: 5, objective: 'جمع 5 مؤشرات حقيقية (خضراء) فقط وتجنب الخداع', color: 'rgba(234, 179, 8, 0.4)' },
+      { id: 8, title: 'صراع الموارد والأقسام', chapter: 'الفصل الثالث: خلف الكواليس', desc: 'صراع شديد بين فريق المبيعات والامتثال الأمني. وازن مصالحهم وتفادى شذوذ البيانات الجاذب.', objType: 'conflict', target: 1, objective: 'موازنة مصالح الأقسام في لوحة التحكم', color: 'rgba(234, 179, 8, 0.4)' },
+      { id: 9, title: 'الحقيقة الصادمة للبيانات', chapter: 'الفصل الثالث: خلف الكواليس', desc: 'النظام مبرمج لاستنزاف البشر. دمر محرك الضغط المركزي Core Engine لتحرير نور وسط عواصف الحمولة الحرة.', objType: 'boss', target: 1, objective: 'مواجهة وتطهير محرك الضغط المركزي Core Engine', color: 'rgba(239, 68, 68, 0.4)' },
+      { id: 10, title: 'الصمت والسكينة', chapter: 'الفصل الرابع: القمة الهادئة', desc: 'الفصل الختامي. صعود أخير هادئ نحو العثور على الذات بعيداً عن ضجيج الأرقام والـ KPIs والضغوطات.', objType: 'silence', target: 1, objective: 'الوصول لمرآة النور واتخاذ القرار المصيري الختامي', color: 'rgba(255, 255, 255, 0.4)' }
+    ];
+
+    const SafeStorage = {
+      get: (key, def) => { try { const v = localStorage.getItem(key); return v !== null ? v : def; } catch { return def; } },
+      set: (key, val) => { try { localStorage.setItem(key, val); } catch {} }
     };
 
-    const h = canvas ? canvas.height : 600;
-    g.cameraY = WORLD_HEIGHT - (h / g.scale);
-  }, [logEvent]);
+    const AudioSynth = (() => {
+      let actx = null;
+      const init = () => {
+        if (actx) return;
+        try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
+      };
+      const play = (type, muted) => {
+        init();
+        if (!actx || muted) return;
+        if (actx.state === 'suspended') actx.resume();
+        try {
+          const osc = actx.createOscillator();
+          const gain = actx.createGain();
+          osc.connect(gain); gain.connect(actx.destination);
+          const now = actx.currentTime;
+          if (type === 'jump') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(140, now); osc.frequency.exponentialRampToValueAtTime(350, now + 0.15);
+            gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+            osc.start(now); osc.stop(now + 0.15);
+          } else if (type === 'dash') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.12);
+            gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            osc.start(now); osc.stop(now + 0.12);
+          } else if (type === 'collect') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(320, now); osc.frequency.setValueAtTime(540, now + 0.08);
+            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+            osc.start(now); osc.stop(now + 0.22);
+          } else if (type === 'damage') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(90, now); osc.frequency.linearRampToValueAtTime(30, now + 0.3);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+          } else if (type === 'success') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(260, now); osc.frequency.setValueAtTime(390, now + 0.1); osc.frequency.setValueAtTime(520, now + 0.2);
+            gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+            osc.start(now); osc.stop(now + 0.4);
+          }
+        } catch {}
+      };
+      return { play };
+    })();
 
-  const triggerStageSuccess = useCallback(() => {
-    const g = G.current;
-    AudioSynth.play('success', isMutedRef.current);
-    logEvent("تم ترميم وإصلاح قطاع البيانات بالكامل وتجاوز الضغوط!", 'success');
+    let isMuted = false;
+    let difficulty = 'medium';
+    let unlockedLevel = parseInt(SafeStorage.get('noor_unlocked_level', '1'));
+    let selectedLevel = 1;
+    let logLines = ['> تم تهيئة الاتصال بنظام لوحة البيانات الوطنية المتطور.'];
 
-    if (g.currentLevel < STAGES.length) {
-      if (g.currentLevel === g.unlockedLevel) {
-        g.unlockedLevel++;
-        SafeStorage.set('noor_unlocked_level', g.unlockedLevel);
-        setUnlockedLevel(g.unlockedLevel);
+    const G = {
+      isPlaying: false,
+      isPaused: false,
+      currentLevel: 1,
+      difficulty: 'medium',
+      gravity: 0.42,
+      jumpStrength: -11.0,
+      moveSpeed: 4.5,
+      platformGap: 110,
+      screenShake: 0,
+      stressIndex: 40,
+      objectiveCollected: 0,
+      cameraY: WORLD_HEIGHT - 600,
+      scale: 1,
+      player: {
+        x: WORLD_WIDTH / 2,
+        y: WORLD_HEIGHT - 120,
+        width: 28,
+        height: 38,
+        vx: 0,
+        vy: 0,
+        faceDir: 1,
+        isGrounded: false,
+        doubleJump: true,
+        pulse: 0,
+        dashCooldown: 0,
+        dashTimer: 0,
+        dashTrail: [],
+        scarfPoints: []
+      },
+      platforms: [],
+      items: [],
+      enemies: [],
+      lasers: [],
+      bgCodes: [],
+      boss: null,
+      bossProjectiles: [],
+      playerProjectiles: [],
+      keys: {},
+      touchLeft: false,
+      touchRight: false,
+      gravityWells: [],
+      fallingErrors: [],
+      stormTimer: 0,
+      isStormActive: false,
+      comboTimer: 0,
+      comboMultiplier: 0
+    };
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // دالة لتسجيل الأحداث التشغيلية
+    function logEvent(text, type = 'info') {
+      const color = type === 'success' ? '#34d399' : type === 'error' ? '#f87171' : type === 'warning' ? '#fbbf24' : '#c084fc';
+      logLines.push(`<span style="color:${color}">> ${text}</span>`);
+      if (logLines.length > 50) logLines.shift();
+      updateLogsUI();
+    }
+
+    function updateLogsUI() {
+      const sidebarLogs = document.getElementById('sidebar-logs');
+      if (sidebarLogs) {
+        sidebarLogs.innerHTML = logLines.join('<br/>');
+        sidebarLogs.scrollTop = sidebarLogs.scrollHeight;
       }
-      g.currentLevel++;
-      setSelectedLevel(g.currentLevel);
-      buildWorld();
-      setShowWelcome(true);
-      g.isPlaying = false;
-    } else {
-      g.isPlaying = false;
-      setShowVictory(true);
-    }
-    syncHUD();
-  }, [buildWorld, logEvent, syncHUD]);
-
-  const triggerNPCDialogue = useCallback((npc) => {
-    G.current.isPlaying = false;
-    pendingDialogue.current = npc;
-
-    let text = '';
-    let options = [];
-
-    if (npc.name === 'م. ناصر') {
-      text = "م. ناصر يحثك بحماس لإطلاق لوحة البيانات لتأكيد المنجز الإداري السريع، متغاضياً عن بعض اختبارات الأمان والضغط لسهولتها النسبية.";
-      options = [
-        { label: "موافقة فورية لإرضاء الإدارة وكسب مديح سريع (+15 توتر)", cb: () => { G.current.stressIndex = Math.min(100, G.current.stressIndex + 15); npc.resolved = true; G.current.objectiveCollected++; logEvent("موافقة متسرعة. أطلق النظام بالثغرات والمهندسون يسهرون قلقاً.", 'warning'); } },
-        { label: "المطالبة بإصلاح شامل واختبار الاختراق أولاً (-10 توتر وعام بسلام)", cb: () => { G.current.stressIndex = Math.max(0, G.current.stressIndex - 10); npc.resolved = true; G.current.objectiveCollected++; logEvent("تم حماية سيرفرات الإطلاق وتأمين البيانات بشكل نموذجي وآمن.", 'success'); } }
-      ];
-    } else if (npc.name === 'أ. منيرة') {
-      text = "أ. منيرة ترى تزايد التعب في عيون الفريق وتوصي بمنح إجازة إجبارية سريعة لجميع المطورين للتنفيس عن التراكم النفسي.";
-      options = [
-        { label: "منح الفريق إجازة 48 ساعة للتنفس وتقليل الاحتراق (-20 توتر)", cb: () => { G.current.stressIndex = Math.max(0, G.current.stressIndex - 20); npc.resolved = true; G.current.objectiveCollected++; logEvent("تم تفعيل بروتوكول النقاهة العاجل وتراجع مؤشر التوتر بشكل ممتاز.", 'success'); } },
-        { label: "الاستمرار في العمل بمثابرة شديدة للحاق بموعد التسليم الموعود (+20 توتر)", cb: () => { G.current.stressIndex = Math.min(100, G.current.stressIndex + 20); npc.resolved = true; G.current.objectiveCollected++; logEvent("استمرت الجلسات الطويلة، جودة الكود تتراجع والفريق يعاني.", 'error'); } }
-      ];
-    } else {
-      text = "الزميل المنهك يحتاج بعض المساعدة لتنظيف سجلات الذاكرة العشوائية وتخفيف عبء معالجة الخادم الخاص به.";
-      options = [
-        { label: "التوقف ومساعدته في دقيقة أمان وتحسين البرمجيات (+1 مساعدة)", cb: () => { npc.resolved = true; G.current.objectiveCollected++; G.current.stressIndex = Math.max(0, G.current.stressIndex - 5); logEvent("شكراً لك! خففت عن الزميل حمولة معالجة قواعد البيانات والمهام المهدرة.", 'success'); } },
-        { label: "التجاوز والتركيز التام على إنجاز مهامك الفردية بسرعة", cb: () => { npc.resolved = true; G.current.objectiveCollected++; G.current.stressIndex = Math.min(100, G.current.stressIndex + 10); logEvent("مررت عنه لتسليم مهامك، تركت زميلك غارقاً في تحدياته الفردية.", 'warning'); } }
-      ];
     }
 
-    setDialogueData({ npc, text, options });
-    setShowDialogue(true);
-  }, [logEvent]);
-
-  const closeDialogue = useCallback(() => {
-    setShowDialogue(false);
-    G.current.isPlaying = true;
-    pendingDialogue.current = null;
-    syncHUD();
-  }, [syncHUD]);
-
-  const triggerDash = useCallback(() => {
-    const g = G.current;
-    if (!g.isPlaying) return;
-    const p = g.player;
-    if (p.dashCooldown > 0 || p.dashTimer > 0) return;
-
-    AudioSynth.play('dash', isMutedRef.current);
-    p.dashTimer = 12; // الاندفاع يستمر لـ 12 إطاراً
-    p.dashCooldown = 90; // مدة تبريد الاندفاع (ثانية ونصف تقريباً)
-    p.vy = 0; // إيقاف السقوط لتسهيل الاندفاع الأفقي الممتع
-    p.vx = p.faceDir * 12.0; // تسريع حاد بالاتجاه الحالي للبطلة
-
-    g.screenShake = 10;
-    logEvent("تم تفعيل الاندفاع البرمجي الخارق للبطلة نور!", 'success');
-  }, [logEvent]);
-
-  // تحديث فيزياء اللعبة والوشاح السيبراني وحسابات الاندفاع وتحديات الجاذبية
-  const updatePhysics = useCallback(() => {
-    const g = G.current;
-    if (!g.isPlaying) return;
-    const p = g.player;
-
-    // تبريد الاندفاع
-    if (p.dashCooldown > 0) {
-      p.dashCooldown--;
-      setDashCooldownPercent(Math.max(0, (p.dashCooldown / 90) * 100));
-    }
-
-    // إدارة الكومبو
-    if (g.comboTimer > 0) {
-      g.comboTimer--;
-      if (g.comboTimer <= 0) {
-        g.comboMultiplier = 0;
-        setComboCount(0);
-      }
-    }
-
-    // إدارة الاندفاع النشط
-    if (p.dashTimer > 0) {
-      p.dashTimer--;
-      p.vy = 0; // تثبيت الارتفاع العمودي أثناء الاندفاع النشط
-      // توليد تأثير طيف أشباح نيون الاندفاع الخرافي
-      if (p.dashTimer % 2 === 0) {
-        p.dashTrail.push({ x: p.x, y: p.y, alpha: 0.6 });
-      }
-    } else {
-      // الحركة الأفقية الاعتيادية
-      if (g.keys['ArrowRight'] || g.keys['KeyD'] || g.touchRight) {
-        p.vx = g.moveSpeed;
-        p.faceDir = 1;
-      } else if (g.keys['ArrowLeft'] || g.keys['KeyA'] || g.touchLeft) {
-        p.vx = -g.moveSpeed;
-        p.faceDir = -1;
+    function syncHUD() {
+      const stage = STAGES[G.currentLevel - 1];
+      document.getElementById('hud-stage-title').innerText = `${stage.chapter} • ${stage.title}`;
+      document.getElementById('hud-objective-text').innerText = stage.objective;
+      document.getElementById('hud-progress-val').innerText = `${G.objectiveCollected} / ${stage.target}`;
+      document.getElementById('hud-stress-val').innerText = `${G.stressIndex}%`;
+      
+      const stressBar = document.getElementById('hud-stress-bar');
+      stressBar.style.width = `${G.stressIndex}%`;
+      if (G.stressIndex > 72) {
+        stressBar.className = "h-full bg-rose-500 rounded-full";
+        document.getElementById('hud-stress-val').className = "text-xs font-black text-rose-400";
+      } else if (G.stressIndex > 45) {
+        stressBar.className = "h-full bg-amber-500 rounded-full";
+        document.getElementById('hud-stress-val').className = "text-xs font-black text-amber-400";
       } else {
-        p.vx *= 0.82;
+        stressBar.className = "h-full bg-emerald-500 rounded-full";
+        document.getElementById('hud-stress-val').className = "text-xs font-black text-emerald-400";
       }
-      p.vy += g.gravity;
-    }
 
-    // تحديث وتطبيق الجاذبية والتأثير المغناطيسي لثقوب الجاذبية السيبرانية
-    for (const well of g.gravityWells) {
-      const dx = well.x - (p.x + p.width / 2);
-      const dy = well.y - (p.y + p.height / 2);
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 180 && p.dashTimer === 0) {
-        // جذب تدريجي تبعا للمسافة لتقديم تجربة حركية ممتعة ومبهرة
-        const force = (1.0 - dist / 180) * well.pullStrength;
-        p.vx += (dx / dist) * force;
-        p.vy += (dy / dist) * force * 0.7;
-      }
-    }
+      const diffLabel = G.difficulty === 'easy' ? 'مستقر (بيئة مريحة)' : G.difficulty === 'medium' ? 'مضغوط (بيئة عمل روتينية)' : 'حرج (إطلاق سريع ومكثف)';
+      const sidebarHtml = `
+        <div style="display:flex;justify-content:space-between;padding:4px 0"><span>وضع الضغط:</span><span style="color:#38bdf8;font-weight:bold">${diffLabel}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #1e293b"><span>الرموز المجمعة:</span><span>${G.objectiveCollected} / ${stage.target}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #1e293b"><span>مؤشر التوتر النفسي:</span><span style="font-weight:bold;color:${G.stressIndex > 72 ? '#f87171' : '#34d399'}">${G.stressIndex}%</span></div>
+        <p style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.5;border-top:1px solid #1e293b;padding-top:6px;text-align:right">${stage.desc}</p>
+      `;
+      document.getElementById('sidebar-objectives').innerHTML = sidebarHtml;
+      document.getElementById('sensory-content').innerHTML = sidebarHtml;
 
-    p.x += p.vx;
-    p.y += p.vy;
-
-    // التفاف الشاشة الذكي أفقياً
-    if (p.x + p.width < 0) p.x = WORLD_WIDTH - 5;
-    else if (p.x > WORLD_WIDTH) p.x = -p.width + 5;
-
-    // حساب ومحاكاة فيزياء حركة وشاح نور النيوني المتدفق مع الهواء وسرعتها
-    if (p.scarfPoints.length > 0) {
-      // نقطة تثبيت الوشاح تكون خلف الرأس/الكتف مباشرة
-      const anchorX = p.x + (p.faceDir === 1 ? 4 : p.width - 4);
-      const anchorY = p.y + 12;
-      p.scarfPoints[0] = { x: anchorX, y: anchorY };
-
-      for (let i = 1; i < p.scarfPoints.length; i++) {
-        const pt = p.scarfPoints[i];
-        const prev = p.scarfPoints[i - 1];
-        const targetX = prev.x - p.faceDir * 6 - p.vx * 0.4;
-        const targetY = prev.y + 4 + Math.sin(p.pulse + i) * 1.5 - p.vy * 0.2;
-        pt.x += (targetX - pt.x) * 0.35;
-        pt.y += (targetY - pt.y) * 0.35;
+      // الكومبو
+      const comboContainer = document.getElementById('hud-combo-container');
+      if (G.comboMultiplier > 1) {
+        comboContainer.classList.remove('hidden');
+        document.getElementById('hud-combo-val').innerText = `x${G.comboMultiplier}`;
+      } else {
+        comboContainer.classList.add('hidden');
       }
     }
 
-    // اضمحلال أشباح الاندفاع تدريجياً
-    for (let i = p.dashTrail.length - 1; i >= 0; i--) {
-      const trail = p.dashTrail[i];
-      trail.alpha -= 0.08;
-      if (trail.alpha <= 0) p.dashTrail.splice(i, 1);
+    function applyDifficulty(lvl) {
+      G.difficulty = lvl;
+      difficulty = lvl;
+      if (lvl === 'easy') { G.gravity = 0.38; G.jumpStrength = -10.5; G.moveSpeed = 4.2; G.platformGap = 95; }
+      else if (lvl === 'medium') { G.gravity = 0.42; G.jumpStrength = -11.0; G.moveSpeed = 4.6; G.platformGap = 115; }
+      else { G.gravity = 0.46; G.jumpStrength = -12.0; G.moveSpeed = 5.2; G.platformGap = 135; }
+      
+      document.querySelectorAll('.diff-btn').forEach(btn => {
+        btn.className = "diff-btn p-2 rounded-xl border border-slate-800 bg-slate-900/50 text-slate-500 font-bold text-xs cursor-pointer transition-all";
+      });
+      const activeBtn = document.getElementById(`diff-${lvl}`);
+      if (activeBtn) {
+        activeBtn.className = `diff-btn p-2 rounded-xl border-sky-500/40 bg-sky-500/10 text-sky-300 font-bold text-xs cursor-pointer transition-all`;
+      }
     }
 
-    // فحص واصطدام نور بالمنصات المتاحة
-    p.isGrounded = false;
-    for (const plat of g.platforms) {
-      if (plat.hasCollapsed) continue;
-      if (plat.isMoving) {
-        plat.x += plat.moveSpeed * plat.dir;
-        if (plat.x < plat.rangeX[0]) { plat.x = plat.rangeX[0]; plat.dir = 1; }
-        if (plat.x > plat.rangeX[1]) { plat.x = plat.rangeX[1]; plat.dir = -1; }
+    function buildWorld() {
+      G.platforms = []; G.items = []; G.enemies = []; G.lasers = []; G.bgCodes = [];
+      G.bossProjectiles = []; G.playerProjectiles = []; G.boss = null;
+      G.gravityWells = []; G.fallingErrors = []; G.objectiveCollected = 0;
+      G.isStormActive = false; G.stormTimer = 0; G.comboMultiplier = 0;
+
+      const stage = STAGES[G.currentLevel - 1];
+
+      // نصوص كود الخلفية الثنائي والتقني
+      const techWords = ['KPI', 'STRESS', 'BUG_404', 'COMPLY_SECURITY', 'DB_LOCKED', 'COMMIT_PROD', 'BURNOUT_EXP'];
+      for (let i = 0; i < 35; i++) {
+        G.bgCodes.push({
+          x: Math.random() * WORLD_WIDTH,
+          y: Math.random() * WORLD_HEIGHT,
+          txt: Math.random() > 0.4 ? techWords[Math.floor(Math.random() * techWords.length)] : (Math.random() > 0.5 ? '1' : '0'),
+          alpha: Math.random() * 0.12 + 0.04,
+          size: Math.floor(Math.random() * 5) + 11
+        });
       }
-      if (p.vy > 0 && p.dashTimer === 0) {
-        if (p.x + p.width / 2 >= plat.x && p.x + p.width / 2 <= plat.x + plat.width) {
-          if (p.y + p.height >= plat.y && p.y + p.height - p.vy <= plat.y + 12) {
-            p.y = plat.y - p.height; p.vy = 0; p.isGrounded = true; p.doubleJump = true;
-            if (plat.isMoving) p.x += plat.moveSpeed * plat.dir;
-            if (plat.type === 'collapsible' && !plat.isStoodOn) {
-              plat.isStoodOn = true;
-              logEvent("تنبيه: أولوية الـ KPI تنهار وتتلاشى بسرعة!", "warning");
-            }
+
+      // المنصة الأرضية الرئيسية
+      G.platforms.push({ x: 0, y: WORLD_HEIGHT - 60, width: WORLD_WIDTH, height: 60, type: 'base', title: 'خادم قواعد البيانات المحلي الآمن', shake: 0 });
+
+      // ثقوب الجاذبية السيبرانية في المراحل المتقدمة
+      if (G.currentLevel >= 2) {
+        G.gravityWells.push({ x: WORLD_WIDTH * 0.25, y: WORLD_HEIGHT - 500, radius: 45, pullStrength: 0.15, rotation: 0 });
+        G.gravityWells.push({ x: WORLD_WIDTH * 0.75, y: WORLD_HEIGHT - 1100, radius: 45, pullStrength: 0.15, rotation: 1.5 });
+      }
+
+      // تحضير خادم وحش القمة
+      if (stage.objType === 'boss') {
+        G.boss = { x: WORLD_WIDTH / 2 - 50, y: 180, width: 100, height: 50, health: 100, maxHealth: 100, shootTimer: 0, pulse: 0, dir: 1 };
+        logEvent("رصد نشاط مدمر للبنية التحتية! تجسد وحش الضغوطات في القمة!", "error");
+      }
+
+      let currentY = WORLD_HEIGHT - 170;
+      let lastX = WORLD_WIDTH / 2 - 80;
+
+      // بناء المنصات والعقبات والأهداف الموزعة أفقياً وعمودياً
+      while (currentY > 250) {
+        const width = 160;
+        const minX = Math.max(20, lastX - 120);
+        const maxX = Math.min(WORLD_WIDTH - width - 20, lastX + 120);
+        const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+
+        let type = 'bar';
+        let isCollapsible = false;
+        if (Math.random() > 0.75 && G.currentLevel >= 2) { type = 'collapsible'; isCollapsible = true; }
+        else if (Math.random() > 0.82) { type = 'gauge'; }
+
+        G.platforms.push({
+          x, y: currentY, width, height: 28, type,
+          title: isCollapsible ? 'أولوية KPI غير مستقرة' : `سجل مراجعة #${Math.floor(currentY / 10)}`,
+          isMoving: Math.random() > 0.55 && G.currentLevel > 1,
+          moveSpeed: Math.random() * 1.2 + 0.5,
+          dir: Math.random() > 0.5 ? 1 : -1,
+          rangeX: [Math.max(10, x - 60), Math.min(WORLD_WIDTH - width - 10, x + 60)],
+          collapseTimer: 90, hasCollapsed: false, isStoodOn: false, shake: 0
+        });
+
+        // عقبات الليزر والكتل
+        if (Math.random() > 0.76 && G.currentLevel >= 2 && currentY < WORLD_HEIGHT - 300) {
+          G.lasers.push({ y: currentY + 50, h: 4, active: true, timer: Math.random() * 120 });
+        }
+        if (Math.random() > 0.68 && G.currentLevel >= 2 && currentY < WORLD_HEIGHT - 300) {
+          G.enemies.push({ x: x + 20, y: currentY - 26, width: 26, height: 22, vx: Math.random() * 0.9 + 0.6, minX: x + 10, maxX: x + width - 36, pulse: Math.random() * 5 });
+        }
+
+        // توزيع العناصر والمكتشفات والأهداف البرمجية
+        if ((stage.objType === 'collect' || stage.objType === 'metrics' || stage.objType === 'boss') && Math.random() > 0.35 && G.items.length < stage.target) {
+          G.items.push({ x: x + width / 2, y: currentY - 26, width: 20, height: 20, type: stage.objType === 'boss' ? 'security_patch' : (stage.objType === 'metrics' ? 'green_metric' : 'token'), pulse: Math.random() * 5 });
+        }
+        if (stage.objType === 'metrics' && Math.random() > 0.55) {
+          G.items.push({ x: x + 25, y: currentY - 24, width: 18, height: 18, type: 'red_metric', pulse: Math.random() * 5 });
+        }
+        if (stage.objType === 'team' && Math.random() > 0.5 && G.items.length < stage.target) {
+          G.items.push({ x: x + width / 2, y: currentY - 34, width: 22, height: 34, type: 'team_npc', name: `مطور #${G.items.length + 1}`, resolved: false });
+        }
+        if (stage.objType === 'executive') {
+          if (currentY < WORLD_HEIGHT - 300 && currentY > WORLD_HEIGHT - 700 && !G.items.some(i => i.name === 'م. ناصر')) {
+            G.items.push({ x: x + 40, y: currentY - 34, width: 22, height: 34, type: 'board_npc', name: 'م. ناصر', title: 'رئيس قطاع التشغيل', resolved: false });
+          }
+          if (currentY < WORLD_HEIGHT - 1000 && currentY > WORLD_HEIGHT - 1400 && !G.items.some(i => i.name === 'أ. منيرة')) {
+            G.items.push({ x: x + 40, y: currentY - 34, width: 22, height: 34, type: 'board_npc', name: 'أ. منيرة', title: 'مديرة الموارد البشرية', resolved: false });
           }
         }
+
+        lastX = x;
+        currentY -= G.platformGap;
       }
-      if (plat.isStoodOn && !plat.hasCollapsed) {
-        plat.shake = Math.sin(plat.collapseTimer * 0.5) * 4;
-        plat.collapseTimer--;
-        if (plat.collapseTimer <= 0) {
-          plat.hasCollapsed = true;
-          AudioSynth.play('damage', isMutedRef.current);
-          g.screenShake = 12;
-          logEvent("تلاشت أولوية الـ KPI المهتزة بالكامل لعدم كفاية الدعم!", "error");
-        }
-      }
+
+      // القمة وال API المركزي
+      G.platforms.push({ x: WORLD_WIDTH / 2 - 110, y: 150, width: 220, height: 40, type: 'summit', title: 'بوابة النقل والاتصال المركزي (API Central)' });
+      G.items.push({ x: WORLD_WIDTH / 2, y: 110, width: 28, height: 28, type: 'summit_gateway' });
+
+      // تهيئة البطلة سيبرانياً مع الوشاح الفيزيائي المضيء
+      G.player = {
+        x: WORLD_WIDTH / 2,
+        y: WORLD_HEIGHT - 130,
+        width: 28,
+        height: 38,
+        vx: 0,
+        vy: 0,
+        faceDir: 1,
+        isGrounded: false,
+        doubleJump: true,
+        pulse: 0,
+        dashCooldown: 0,
+        dashTimer: 0,
+        dashTrail: [],
+        scarfPoints: Array.from({ length: 6 }, (_, i) => ({ x: WORLD_WIDTH / 2, y: WORLD_HEIGHT - 130 + i * 4 }))
+      };
+
+      const h = canvas.height;
+      G.cameraY = WORLD_HEIGHT - (h / G.scale);
     }
 
-    // رصد السقوط خارج البنية الأساسية للمنصات
-    if (p.y > WORLD_HEIGHT) {
-      p.y = WORLD_HEIGHT - 150; p.vy = -8;
-      g.stressIndex = Math.min(100, g.stressIndex + 15);
-      g.screenShake = 15;
-      AudioSynth.play('damage', isMutedRef.current);
-      logEvent("سقطت البطلة خارج النظام! تأثرت البنية الأمنية وارتفع التوتر النفسي (+15%)", "error");
+    function triggerDash() {
+      if (!G.isPlaying) return;
+      const p = G.player;
+      if (p.dashCooldown > 0 || p.dashTimer > 0) return;
+
+      AudioSynth.play('dash', isMuted);
+      p.dashTimer = 12;
+      p.dashCooldown = 90;
+      p.vy = 0;
+      p.vx = p.faceDir * 12.0;
+
+      G.screenShake = 10;
+      logEvent("تم تفعيل الاندفاع البرمجي الخارق للبطلة نور!", 'success');
+    }
+
+    // دالة محاكاة القفز المزدوج
+    function handleJump() {
+      if (!G.isPlaying) return;
+      const p = G.player;
+      if (p.isGrounded) { p.vy = G.jumpStrength; p.isGrounded = false; p.doubleJump = true; AudioSynth.play('jump', isMuted); }
+      else if (p.doubleJump) { p.vy = G.jumpStrength * 0.85; p.doubleJump = false; AudioSynth.play('jump', isMuted); }
+    }
+
+    let pendingDialogueNPC = null;
+    function triggerNPCDialogue(npc) {
+      G.isPlaying = false;
+      pendingDialogueNPC = npc;
+
+      let text = '';
+      let options = [];
+
+      if (npc.name === 'م. ناصر') {
+        text = "ناصر يضغط عليك لإطلاق النظام فوراً في الموعد المحدد لإثبات ريادة التحول الرقمي، رغم وجود ثغرة ثانوية في حماية قواعد البيانات لم تُحل بعد.";
+        options = [
+          { label: "أطلق النظام الآن لإرضاء الإدارة وكسب الثقة التجارية (+15 توتر)", cb: () => { G.stressIndex = Math.min(100, G.stressIndex + 15); npc.resolved = true; G.objectiveCollected++; logEvent("تم إطلاق النظام. الإدارة راضية ولكن البنية التحتية مهددة بالثغرات.", 'warning'); } },
+          { label: "ارفض الإطلاق وطالب بجلسة فحص أمنية كاملة (+10 دعم للفريق)", cb: () => { G.stressIndex = Math.max(0, G.stressIndex - 10); npc.resolved = true; G.objectiveCollected++; logEvent("تأجيل الإطلاق لإصلاح الثغرة. الفريق يشعر بتقدير حقيقي لجهود الحماية.", 'success'); } }
+        ];
+      } else if (npc.name === 'أ. منيرة') {
+        text = "أ. منيرة تقترح إيقاف عمليات التطوير المتلاحقة فوراً لمدة 48 ساعة لمنح الفريق فرصة لالتقاط الأنفاس وتقليص مستويات الاحتراق النفسي العام.";
+        options = [
+          { label: "وافق على منحهم الاستراحة وأوقف تسليم المؤشرات مؤقتاً (-20 توتر)", cb: () => { G.stressIndex = Math.max(0, G.stressIndex - 20); npc.resolved = true; G.objectiveCollected++; logEvent("تم تفعيل الإجازة والراحة. انخفض التوتر النفسي للفريق بشكل ممتاز.", 'success'); } },
+          { label: "ارفض التأجيل وشدد على ضرورة الوفاء بمتطلبات تسليم الـ KPIs", cb: () => { G.stressIndex = Math.min(100, G.stressIndex + 20); npc.resolved = true; G.objectiveCollected++; logEvent("الفريق مستمر بالعمل المكثف. إنتاجية عالية على حساب الصحة المهنية.", 'error'); } }
+        ];
+      } else {
+        text = "زميل العمل يمر بضغط شديد بسبب تراكم مهام قواعد البيانات ويطلب إرشادك السريع لتجنب ارتكاب أخطاء حاسمة.";
+        options = [
+          { label: "توقف وساعده على معالجة السجلات الممتلئة (+1 مساعدة)", cb: () => { npc.resolved = true; G.objectiveCollected++; G.stressIndex = Math.max(0, G.stressIndex - 5); logEvent("شرحت له كيفية تفعيل توازن الأحمال. ارتفعت جودة العمل التشاركي.", 'success'); } },
+          { label: "أخبره بأن الوقت حرج وتجاوزه لتسليم حصتك الفردية", cb: () => { npc.resolved = true; G.objectiveCollected++; G.stressIndex = Math.min(100, G.stressIndex + 10); logEvent("أكملت الصعود تاركاً الزميل في ضغوطاته الفردية المتراكمة.", 'warning'); } }
+        ];
+      }
+
+      document.getElementById('dialogue-npc-name').innerText = npc.name;
+      document.getElementById('dialogue-npc-title').innerText = npc.title || 'فريق البنية التحتية';
+      document.getElementById('dialogue-text').innerText = text;
+      
+      const optionsContainer = document.getElementById('dialogue-options');
+      optionsContainer.innerHTML = '';
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-right p-3 bg-slate-800 border border-slate-700 rounded-2xl text-xs text-slate-100 font-bold cursor-pointer transition-colors hover:bg-slate-700";
+        btn.innerText = opt.label;
+        btn.onclick = () => {
+          opt.cb();
+          closeDialogue();
+        };
+        optionsContainer.appendChild(btn);
+      });
+
+      document.getElementById('dialogue-overlay').classList.remove('hidden');
+    }
+
+    function closeDialogue() {
+      document.getElementById('dialogue-overlay').classList.add('hidden');
+      G.isPlaying = true;
+      pendingDialogueNPC = null;
       syncHUD();
     }
 
-    // تتبع ناعم وسلس للغاية للكاميرا الخلفية
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const targetCamY = p.y - (canvas.height / g.scale) / 2;
-      const maxCamY = WORLD_HEIGHT - (canvas.height / g.scale);
-      g.cameraY += (Math.max(0, Math.min(maxCamY, targetCamY)) - g.cameraY) * 0.12;
-    }
-  }, [logEvent, syncHUD]);
+    function triggerStageSuccess() {
+      AudioSynth.play('success', isMuted);
+      logEvent("تم ترميم وإصلاح قطاع البيانات بالكامل وتجاوز الضغوط!", 'success');
 
-  // تحديث الأعداء والأدوات والزعماء وتحدي "عاصفة الأخطاء المتساقطة"
-  const updateEntities = useCallback(() => {
-    const g = G.current;
-    if (!g.isPlaying) return;
-    const p = g.player;
-    const stage = STAGES[g.currentLevel - 1];
-
-    // تحديث دوران ثقوب الجاذبية السيبرانية لتأثير حركي مبهر
-    for (const well of g.gravityWells) {
-      well.rotation += 0.05;
-    }
-
-    // توليد تحدي: "عاصفة الأخطاء المتساقطة" (Error Storm)
-    g.stormTimer++;
-    if (g.currentLevel >= 3 && g.stormTimer % 180 === 0) {
-      g.isStormActive = true;
-      logEvent("تحذير: هبوب عاصفة برمجية خطرة! كتل الأخطاء الحمراء تهبط من الأعلى!", "warning");
-    }
-    if (g.isStormActive && g.stormTimer % 20 === 0 && g.fallingErrors.length < 5) {
-      // إسقاط أخطاء عشوائية من أعلى الكاميرا بقليل لتفادي مباغتتها
-      g.fallingErrors.push({
-        x: Math.random() * WORLD_WIDTH,
-        y: g.cameraY - 20,
-        vy: Math.random() * 2.5 + 2.5,
-        width: 16,
-        height: 16,
-        pulse: 0
-      });
-    }
-    if (g.isStormActive && g.stormTimer % 350 === 0) {
-      g.isStormActive = false;
-      logEvent("استقرت العاصفة مؤقتاً وعادت حمولة البيانات طبيعية.", "success");
-    }
-
-    // حركة الأخطاء المتساقطة وفحص الاصطدام
-    for (let fe = g.fallingErrors.length - 1; fe >= 0; fe--) {
-      const err = g.fallingErrors[fe];
-      err.y += err.vy;
-      err.pulse += 0.2;
-      if (p.x < err.x + err.width && p.x + p.width > err.x && p.y < err.y + err.height && p.y + p.height > err.y) {
-        g.stressIndex = Math.min(100, g.stressIndex + 10);
-        g.screenShake = 10;
-        AudioSynth.play('damage', isMutedRef.current);
-        logEvent("أصابت نور كتلة خطأ من العاصفة البرمجية! (+10% توتر)", "error");
-        g.fallingErrors.splice(fe, 1);
-        syncHUD();
-        continue;
-      }
-      const canvas = canvasRef.current;
-      if (canvas && err.y > g.cameraY + canvas.height / g.scale) {
-        g.fallingErrors.splice(fe, 1);
-      }
-    }
-
-    // العقبات الأمنية لليزر
-    for (const las of g.lasers) {
-      las.timer += 1;
-      las.active = las.timer % 150 < 80;
-      if (las.active && p.y + p.height > las.y && p.y < las.y + las.h) {
-        g.stressIndex = Math.min(100, g.stressIndex + 12);
-        p.vy = -6; g.screenShake = 10;
-        AudioSynth.play('damage', isMutedRef.current);
-        logEvent("تنبيه: حقل ليزر أمني يعيق عبور نور في الخلفية ويبعث ثغرات (+12% توتر)", "error");
-        syncHUD();
-      }
-    }
-
-    // حركة الأعداء الفيروسية
-    for (const e of g.enemies) {
-      e.x += e.vx;
-      if (e.x < e.minX || e.x > e.maxX) e.vx = -e.vx;
-      e.pulse += 0.15;
-      if (p.x < e.x + e.width && p.x + p.width > e.x && p.y < e.y + e.height && p.y + p.height > e.y) {
-        g.stressIndex = Math.min(100, g.stressIndex + 15);
-        p.vy = -7; g.screenShake = 14;
-        AudioSynth.play('damage', isMutedRef.current);
-        logEvent("تحذير: البطلة اصطدمت بفيروس من لوحة التحكّم الحيوية (+15% توتر)", "error");
-        syncHUD();
-      }
-    }
-
-    // مواجهة الزعيم
-    if (g.boss && g.boss.health > 0) {
-      g.boss.pulse += 0.05;
-      g.boss.x += g.boss.dir * 1.5;
-      if (g.boss.x < 30 || g.boss.x > WORLD_WIDTH - g.boss.width - 30) g.boss.dir *= -1;
-      g.boss.shootTimer++;
-      if (g.boss.shootTimer > 90) {
-        g.bossProjectiles.push({ x: g.boss.x + g.boss.width / 2, y: g.boss.y + g.boss.height, vy: 4, width: 14, height: 14 });
-        g.boss.shootTimer = 0;
-      }
-      for (let bp = g.bossProjectiles.length - 1; bp >= 0; bp--) {
-        const proj = g.bossProjectiles[bp];
-        proj.y += proj.vy;
-        if (p.x < proj.x + proj.width && p.x + p.width > proj.x && p.y < proj.y + proj.height && p.y + p.height > proj.y) {
-          g.stressIndex = Math.min(100, g.stressIndex + 14);
-          g.screenShake = 8;
-          AudioSynth.play('damage', isMutedRef.current);
-          logEvent("أصاب نور خطأ فادح منبثق من وحش الضغوطات! (+14% توتر)", "error");
-          g.bossProjectiles.splice(bp, 1);
-          syncHUD(); continue;
+      if (G.currentLevel < STAGES.length) {
+        if (G.currentLevel === unlockedLevel) {
+          unlockedLevel++;
+          SafeStorage.set('noor_unlocked_level', unlockedLevel);
         }
-        const canvas = canvasRef.current;
-        if (canvas && proj.y > g.cameraY + canvas.height / g.scale) g.bossProjectiles.splice(bp, 1);
+        G.currentLevel++;
+        selectedLevel = G.currentLevel;
+        buildWorld();
+        setupStagesGrid();
+        document.getElementById('welcome-overlay').classList.remove('hidden');
+        G.isPlaying = false;
+      } else {
+        G.isPlaying = false;
+        document.getElementById('victory-overlay').classList.remove('hidden');
       }
-      for (let pp = g.playerProjectiles.length - 1; pp >= 0; pp--) {
-        const proj = g.playerProjectiles[pp];
-        proj.y -= 7;
-        if (proj.x < g.boss.x + g.boss.width && proj.x + proj.width > g.boss.x && proj.y < g.boss.y + g.boss.height && proj.y + proj.height > g.boss.y) {
-          g.boss.health = Math.max(0, g.boss.health - 25);
-          g.screenShake = 10;
-          AudioSynth.play('success', isMutedRef.current);
-          logEvent(`أصاب جدار حماية نور الزعيم! صحة الزعيم الحالية: ${g.boss.health}%`, "success");
-          g.playerProjectiles.splice(pp, 1);
-          if (g.boss.health <= 0) {
-            logEvent("انتصار ساحق! تم تطهير خادم القمة بالكامل وفتحت بوابة النقل المركزي الآمن!", "success");
-            g.objectiveCollected = 1;
-            syncHUD();
+      syncHUD();
+    }
+
+    function updatePhysics() {
+      if (!G.isPlaying) return;
+      const p = G.player;
+
+      // تبريد الاندفاع
+      if (p.dashCooldown > 0) {
+        p.dashCooldown--;
+        const pct = Math.max(0, (p.dashCooldown / 90) * 100);
+        document.getElementById('ctrl-dash-cooldown').innerText = pct > 0 ? `${Math.ceil(pct / 10)}%` : 'اندفاع';
+      }
+
+      // إدارة الكومبو والتوقيت
+      if (G.comboTimer > 0) {
+        G.comboTimer--;
+        if (G.comboTimer <= 0) {
+          G.comboMultiplier = 0;
+          syncHUD();
+        }
+      }
+
+      // معالجة الاندفاع السريع
+      if (p.dashTimer > 0) {
+        p.dashTimer--;
+        p.vy = 0;
+        if (p.dashTimer % 2 === 0) {
+          p.dashTrail.push({ x: p.x, y: p.y, alpha: 0.6 });
+        }
+      } else {
+        // الحركة الأفقية الاعتيادية
+        if (G.keys['ArrowRight'] || G.keys['KeyD'] || G.touchRight) {
+          p.vx = G.moveSpeed;
+          p.faceDir = 1;
+        } else if (G.keys['ArrowLeft'] || G.keys['KeyA'] || G.touchLeft) {
+          p.vx = -G.moveSpeed;
+          p.faceDir = -1;
+        } else {
+          p.vx *= 0.82;
+        }
+        p.vy += G.gravity;
+      }
+
+      // جذب شذوذ ثقوب الجاذبية
+      for (const well of G.gravityWells) {
+        const dx = well.x - (p.x + p.width / 2);
+        const dy = well.y - (p.y + p.height / 2);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 180 && p.dashTimer === 0) {
+          const force = (1.0 - dist / 180) * well.pullStrength;
+          p.vx += (dx / dist) * force;
+          p.vy += (dy / dist) * force * 0.7;
+        }
+      }
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // التفاف الشاشة
+      if (p.x + p.width < 0) p.x = WORLD_WIDTH - 5;
+      else if (p.x > WORLD_WIDTH) p.x = -p.width + 5;
+
+      // فيزياء وشاح النيون المتدفق مع حركة البطلة
+      if (p.scarfPoints.length > 0) {
+        const anchorX = p.x + (p.faceDir === 1 ? 4 : p.width - 4);
+        const anchorY = p.y + 12;
+        p.scarfPoints[0] = { x: anchorX, y: anchorY };
+
+        for (let i = 1; i < p.scarfPoints.length; i++) {
+          const pt = p.scarfPoints[i];
+          const prev = p.scarfPoints[i - 1];
+          const targetX = prev.x - p.faceDir * 6 - p.vx * 0.4;
+          const targetY = prev.y + 4 + Math.sin(p.pulse + i) * 1.5 - p.vy * 0.2;
+          pt.x += (targetX - pt.x) * 0.35;
+          pt.y += (targetY - pt.y) * 0.35;
+        }
+      }
+
+      // تلاشي أشباح الاندفاع
+      for (let i = p.dashTrail.length - 1; i >= 0; i--) {
+        const trail = p.dashTrail[i];
+        trail.alpha -= 0.08;
+        if (trail.alpha <= 0) p.dashTrail.splice(i, 1);
+      }
+
+      // اصطدام نور بالمنصات
+      p.isGrounded = false;
+      for (const plat of G.platforms) {
+        if (plat.hasCollapsed) continue;
+        if (plat.isMoving) {
+          plat.x += plat.moveSpeed * plat.dir;
+          if (plat.x < plat.rangeX[0]) { plat.x = plat.rangeX[0]; plat.dir = 1; }
+          if (plat.x > plat.rangeX[1]) { plat.x = plat.rangeX[1]; plat.dir = -1; }
+        }
+        if (p.vy > 0 && p.dashTimer === 0) {
+          if (p.x + p.width / 2 >= plat.x && p.x + p.width / 2 <= plat.x + plat.width) {
+            if (p.y + p.height >= plat.y && p.y + p.height - p.vy <= plat.y + 12) {
+              p.y = plat.y - p.height; p.vy = 0; p.isGrounded = true; p.doubleJump = true;
+              if (plat.isMoving) p.x += plat.moveSpeed * plat.dir;
+              if (plat.type === 'collapsible' && !plat.isStoodOn) {
+                plat.isStoodOn = true;
+                logEvent("تنبيه: أولوية الـ KPI تنهار وتتلاشى بسرعة!", "warning");
+              }
+            }
           }
+        }
+        if (plat.isStoodOn && !plat.hasCollapsed) {
+          plat.shake = Math.sin(plat.collapseTimer * 0.5) * 4;
+          plat.collapseTimer--;
+          if (plat.collapseTimer <= 0) {
+            plat.hasCollapsed = true;
+            AudioSynth.play('damage', isMuted);
+            G.screenShake = 12;
+            logEvent("تلاشت أولوية الـ KPI المهتزة بالكامل لعدم كفاية الدعم!", "error");
+          }
+        }
+      }
+
+      // سقوط نور في الهاوية
+      if (p.y > WORLD_HEIGHT) {
+        p.y = WORLD_HEIGHT - 150; p.vy = -8;
+        G.stressIndex = Math.min(100, G.stressIndex + 15);
+        G.screenShake = 15;
+        AudioSynth.play('damage', isMuted);
+        logEvent("سقطت البطلة خارج النظام! تأثرت البنية الأمنية وارتفع التوتر النفسي (+15%)", "error");
+        syncHUD();
+      }
+
+      const targetCamY = p.y - (canvas.height / G.scale) / 2;
+      const maxCamY = WORLD_HEIGHT - (canvas.height / G.scale);
+      G.cameraY += (Math.max(0, Math.min(maxCamY, targetCamY)) - G.cameraY) * 0.12;
+    }
+
+    function updateEntities() {
+      if (!G.isPlaying) return;
+      const p = G.player;
+      const stage = STAGES[G.currentLevel - 1];
+
+      // دوران ثقوب الجاذبية
+      for (const well of G.gravityWells) {
+        well.rotation += 0.05;
+      }
+
+      // تحدي: عواصف الأخطاء البرمجية المتساقطة
+      G.stormTimer++;
+      if (G.currentLevel >= 3 && G.stormTimer % 180 === 0) {
+        G.isStormActive = true;
+        logEvent("تحذير: هبوب عاصفة برمجية خطرة! كتل الأخطاء الحمراء تهبط من الأعلى!", "warning");
+      }
+      if (G.isStormActive && G.stormTimer % 20 === 0 && G.fallingErrors.length < 5) {
+        G.fallingErrors.push({
+          x: Math.random() * WORLD_WIDTH,
+          y: G.cameraY - 20,
+          vy: Math.random() * 2.5 + 2.5,
+          width: 16,
+          height: 16,
+          pulse: 0
+        });
+      }
+      if (G.isStormActive && G.stormTimer % 350 === 0) {
+        G.isStormActive = false;
+        logEvent("استقرت العاصفة مؤقتاً وعادت حمولة البيانات طبيعية.", "success");
+      }
+
+      // حركة واصطدام كتل الأخطاء
+      for (let fe = G.fallingErrors.length - 1; fe >= 0; fe--) {
+        const err = G.fallingErrors[fe];
+        err.y += err.vy;
+        err.pulse += 0.2;
+        if (p.x < err.x + err.width && p.x + p.width > err.x && p.y < err.y + err.height && p.y + p.height > err.y) {
+          G.stressIndex = Math.min(100, G.stressIndex + 10);
+          G.screenShake = 10;
+          AudioSynth.play('damage', isMuted);
+          logEvent("أصابت نور كتلة خطأ من العاصفة البرمجية! (+10% توتر)", "error");
+          G.fallingErrors.splice(fe, 1);
+          syncHUD();
           continue;
         }
-        if (proj.y < g.cameraY) g.playerProjectiles.splice(pp, 1);
-      }
-    }
-
-    // تجميع الأدوات والأهداف مع إضافة نظام الكومبو الفائق (Combo System)
-    for (let i = g.items.length - 1; i >= 0; i--) {
-      const item = g.items[i];
-      item.pulse = (item.pulse || 0) + 0.12;
-      if (p.x < item.x + item.width && p.x + p.width > item.x && p.y < item.y + item.height && p.y + p.height > item.y) {
-        if (item.type === 'token') {
-          // رفع الكومبو لتقليل التوتر بشكل فائق وسريع
-          g.comboMultiplier++;
-          g.comboTimer = 180; // الكومبو يستمر لمدة 3 ثوانٍ
-          setComboCount(g.comboMultiplier);
-
-          g.objectiveCollected++;
-          AudioSynth.play('collect', isMutedRef.current);
-
-          const stressReduction = 3 + g.comboMultiplier;
-          g.stressIndex = Math.max(0, g.stressIndex - stressReduction);
-
-          if (g.comboMultiplier >= 2) {
-            logEvent(`كومبو فائق x${g.comboMultiplier}! انخفض التوتر بشكل مضاعف -${stressReduction}%!`, "success");
-          } else {
-            logEvent("تم العثور على رمز أمان حقيقي ومصادق من النظام (+1)", "success");
-          }
-          g.items.splice(i, 1);
-        } else if (item.type === 'security_patch') {
-          if (g.boss && g.boss.health > 0) {
-            g.playerProjectiles.push({ x: p.x + p.width / 2 - 4, y: p.y, width: 8, height: 16 });
-            AudioSynth.play('collect', isMutedRef.current);
-            logEvent("تم التهام حزمة مصادقة نيون! تم إطلاق قذيفة حماية جبارة لحل الأزمة!", "success");
-          } else {
-            logEvent("تم ترميم وإصلاح خادم القمة من شتى الثغرات والأزمات.", "success");
-          }
-          g.items.splice(i, 1);
-        } else if (item.type === 'green_metric') {
-          g.objectiveCollected++;
-          AudioSynth.play('collect', isMutedRef.current);
-          g.stressIndex = Math.max(0, g.stressIndex - 12);
-          logEvent("مؤشر أداء حقيقي ومبشر بالصحة الوظيفية! انخفض التوتر -12%", "success");
-          g.items.splice(i, 1);
-        } else if (item.type === 'red_metric') {
-          g.stressIndex = Math.min(100, g.stressIndex + 14);
-          AudioSynth.play('damage', isMutedRef.current);
-          logEvent("تحذير! مؤشر أداء زائف ومضلل يزيد التوتر السلوكي (+14%)", "error");
-          g.items.splice(i, 1);
-        } else if ((item.type === 'team_npc' || item.type === 'board_npc') && !item.resolved) {
-          triggerNPCDialogue(item);
-        } else if (item.type === 'summit_gateway') {
-          if (g.boss && g.boss.health > 0) {
-            logEvent("النظام في خطر! دمر وحش الاحتراق المركزي أولاً لحقن النقل المركزي!", "warning");
-            p.vy = -6;
-          } else if (g.objectiveCollected >= stage.target) {
-            triggerStageSuccess();
-          } else {
-            logEvent(`مؤشرات العبور مغلقة! متطلب القطاع لم ينجز بعد: ${g.objectiveCollected} / ${stage.target}`, "warning");
-            p.vy = -6;
-          }
+        if (err.y > G.cameraY + canvas.height / G.scale) {
+          G.fallingErrors.splice(fe, 1);
         }
-        syncHUD();
+      }
+
+      // ليزرات أمنية متحركة
+      for (const las of G.lasers) {
+        las.timer += 1;
+        las.active = las.timer % 150 < 80;
+        if (las.active && p.y + p.height > las.y && p.y < las.y + las.h) {
+          G.stressIndex = Math.min(100, G.stressIndex + 12);
+          p.vy = -6; G.screenShake = 10;
+          AudioSynth.play('damage', isMuted);
+          logEvent("تنبيه: حقل ليزر أمني يعيق عبور نور في الخلفية ويبعث ثغرات (+12% توتر)", "error");
+          syncHUD();
+        }
+      }
+
+      // فيروسات متحركة
+      for (const e of G.enemies) {
+        e.x += e.vx;
+        if (e.x < e.minX || e.x > e.maxX) e.vx = -e.vx;
+        e.pulse += 0.15;
+        if (p.x < e.x + e.width && p.x + p.width > e.x && p.y < e.y + e.height && p.y + p.height > e.y) {
+          G.stressIndex = Math.min(100, G.stressIndex + 15);
+          p.vy = -7; G.screenShake = 14;
+          AudioSynth.play('damage', isMuted);
+          logEvent("تحذير: البطلة اصطدمت بفيروس من لوحة التحكّم الحيوية (+15% توتر)", "error");
+          syncHUD();
+        }
+      }
+
+      // مواجهة وحش الزعيم في القمة
+      if (G.boss && G.boss.health > 0) {
+        G.boss.pulse += 0.05;
+        G.boss.x += G.boss.dir * 1.5;
+        if (G.boss.x < 30 || G.boss.x > WORLD_WIDTH - G.boss.width - 30) G.boss.dir *= -1;
+        G.boss.shootTimer++;
+        if (G.boss.shootTimer > 90) {
+          G.bossProjectiles.push({ x: G.boss.x + G.boss.width / 2, y: G.boss.y + G.boss.height, vy: 4, width: 14, height: 14 });
+          G.boss.shootTimer = 0;
+        }
+        for (let bp = G.bossProjectiles.length - 1; bp >= 0; bp--) {
+          const proj = G.bossProjectiles[bp];
+          proj.y += proj.vy;
+          if (p.x < proj.x + proj.width && p.x + p.width > proj.x && p.y < proj.y + proj.height && p.y + p.height > proj.y) {
+            G.stressIndex = Math.min(100, G.stressIndex + 14);
+            G.screenShake = 8;
+            AudioSynth.play('damage', isMuted);
+            logEvent("أصاب نور خطأ فادح منبثق من وحش الضغوطات! (+14% توتر)", "error");
+            G.bossProjectiles.splice(bp, 1);
+            syncHUD(); continue;
+          }
+          if (proj.y > G.cameraY + canvas.height / G.scale) G.bossProjectiles.splice(bp, 1);
+        }
+        for (let pp = G.playerProjectiles.length - 1; pp >= 0; pp--) {
+          const proj = G.playerProjectiles[pp];
+          proj.y -= 7;
+          if (proj.x < G.boss.x + G.boss.width && proj.x + proj.width > G.boss.x && proj.y < G.boss.y + G.boss.height && proj.y + proj.height > G.boss.y) {
+            G.boss.health = Math.max(0, G.boss.health - 25);
+            G.screenShake = 10;
+            AudioSynth.play('success', isMuted);
+            logEvent(`أصاب جدار حماية نور الزعيم! صحة الزعيم الحالية: ${G.boss.health}%`, "success");
+            G.playerProjectiles.splice(pp, 1);
+            if (G.boss.health <= 0) {
+              logEvent("انتصار ساحق! تم تطهير خادم القمة بالكامل وفتحت بوابة النقل المركزي الآمن!", "success");
+              G.objectiveCollected = 1;
+              syncHUD();
+            }
+            continue;
+          }
+          if (proj.y < G.cameraY) G.playerProjectiles.splice(pp, 1);
+        }
+      }
+
+      // تجميع الرموز والمؤشرات وميزات الكومبو الفائق
+      for (let i = G.items.length - 1; i >= 0; i--) {
+        const item = G.items[i];
+        item.pulse = (item.pulse || 0) + 0.12;
+        if (p.x < item.x + item.width && p.x + p.width > item.x && p.y < item.y + item.height && p.y + p.height > item.y) {
+          if (item.type === 'token') {
+            G.comboMultiplier++;
+            G.comboTimer = 180;
+            G.objectiveCollected++;
+            AudioSynth.play('collect', isMuted);
+
+            const stressReduction = 3 + G.comboMultiplier;
+            G.stressIndex = Math.max(0, G.stressIndex - stressReduction);
+
+            if (G.comboMultiplier >= 2) {
+              logEvent(`كومبو فائق x${G.comboMultiplier}! انخفض التوتر بشكل مضاعف -${stressReduction}%!`, "success");
+            } else {
+              logEvent("تم العثور على رمز أمان حقيقي ومصادق من النظام (+1)", "success");
+            }
+            G.items.splice(i, 1);
+          } else if (item.type === 'security_patch') {
+            if (G.boss && G.boss.health > 0) {
+              G.playerProjectiles.push({ x: p.x + p.width / 2 - 4, y: p.y, width: 8, height: 16 });
+              AudioSynth.play('collect', isMuted);
+              logEvent("تم التهام حزمة مصادقة نيون! تم إطلاق قذيفة حماية جبارة لحل الأزمة!", "success");
+            } else {
+              logEvent("تم ترميم وإصلاح خادم القمة من شتى الثغرات والأزمات.", "success");
+            }
+            G.items.splice(i, 1);
+          } else if (item.type === 'green_metric') {
+            G.objectiveCollected++;
+            AudioSynth.play('collect', isMuted);
+            G.stressIndex = Math.max(0, G.stressIndex - 12);
+            logEvent("مؤشر أداء حقيقي ومبشر بالصحة الوظيفية! انخفض التوتر -12%", "success");
+            G.items.splice(i, 1);
+          } else if (item.type === 'red_metric') {
+            G.stressIndex = Math.min(100, G.stressIndex + 14);
+            AudioSynth.play('damage', isMuted);
+            logEvent("تحذير! مؤشر أداء زائف ومضلل يزيد التوتر السلوكي (+14%)", "error");
+            G.items.splice(i, 1);
+          } else if ((item.type === 'team_npc' || item.type === 'board_npc') && !item.resolved) {
+            triggerNPCDialogue(item);
+          } else if (item.type === 'summit_gateway') {
+            if (G.boss && G.boss.health > 0) {
+              logEvent("النظام في خطر! دمر وحش الاحتراق المركزي أولاً لحقن النقل المركزي!", "warning");
+              p.vy = -6;
+            } else if (G.objectiveCollected >= stage.target) {
+              triggerStageSuccess();
+            } else {
+              logEvent(`مؤشرات العبور مغلقة! متطلب القطاع لم ينجز بعد: ${G.objectiveCollected} / ${stage.target}`, "warning");
+              p.vy = -6;
+            }
+          }
+          syncHUD();
+        }
       }
     }
-  }, [logEvent, syncHUD, triggerNPCDialogue, triggerStageSuccess]);
 
-  // رسم اللعبة بالكامل على الـ Canvas
-  const drawGame = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const g = G.current;
+    function drawGame() {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#020617';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+      G.scale = canvas.width / WORLD_WIDTH;
+      if (G.scale <= 0) G.scale = 1;
 
-    g.scale = canvas.width / WORLD_WIDTH;
-    if (g.scale <= 0) g.scale = 1;
-
-    ctx.save();
-    ctx.scale(g.scale, g.scale);
-
-    if (g.screenShake > 0) {
-      ctx.translate((Math.random() - 0.5) * g.screenShake, (Math.random() - 0.5) * g.screenShake);
-      g.screenShake *= 0.88;
-      if (g.screenShake < 0.5) g.screenShake = 0;
-    }
-
-    ctx.translate(0, -g.cameraY);
-
-    // شبكة نيون جميلة للغاية للخلفية السحرية
-    ctx.strokeStyle = 'rgba(56,189,248,0.03)'; ctx.lineWidth = 1;
-    const startGridY = Math.floor(g.cameraY / 40) * 40;
-    const endGridY = startGridY + (canvas.height / g.scale) + 40;
-    for (let y = startGridY; y < endGridY; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_WIDTH, y); ctx.stroke(); }
-    for (let x = 0; x < WORLD_WIDTH; x += 40) { ctx.beginPath(); ctx.moveTo(x, g.cameraY); ctx.lineTo(x, g.cameraY + canvas.height / g.scale); ctx.stroke(); }
-
-    // رسم ثقوب الجاذبية السيبرانية الدوارة والمبهرة بصرياً
-    for (const well of g.gravityWells) {
       ctx.save();
-      ctx.translate(well.x, well.y);
-      ctx.rotate(well.rotation);
+      ctx.scale(G.scale, G.scale);
 
-      // رسم الحلقات الدوارة
-      ctx.strokeStyle = 'rgba(249, 115, 22, 0.45)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(0, 0, well.radius, 0, Math.PI * 1.5);
-      ctx.stroke();
+      if (G.screenShake > 0) {
+        ctx.translate((Math.random() - 0.5) * G.screenShake, (Math.random() - 0.5) * G.screenShake);
+        G.screenShake *= 0.88;
+        if (G.screenShake < 0.5) G.screenShake = 0;
+      }
 
-      ctx.strokeStyle = 'rgba(236, 72, 153, 0.35)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(0, 0, well.radius - 12, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.translate(0, -G.cameraY);
 
-      // النواة الداخلية الجاذبة
-      const grad = ctx.createRadialGradient(0, 0, 1, 0, 0, 16);
-      grad.addColorStop(0, '#ffffff');
-      grad.addColorStop(0.5, '#ec4899');
-      grad.addColorStop(1, 'transparent');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(0, 0, 16, 0, Math.PI * 2);
-      ctx.fill();
+      // رسم شبكة الخلفية الفنية
+      ctx.strokeStyle = 'rgba(56,189,248,0.03)'; ctx.lineWidth = 1;
+      const startGridY = Math.floor(G.cameraY / 40) * 40;
+      const endGridY = startGridY + (canvas.height / G.scale) + 40;
+      for (let y = startGridY; y < endGridY; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_WIDTH, y); ctx.stroke(); }
+      for (let x = 0; x < WORLD_WIDTH; x += 40) { ctx.beginPath(); ctx.moveTo(x, G.cameraY); ctx.lineTo(x, G.cameraY + canvas.height / G.scale); ctx.stroke(); }
 
-      ctx.restore();
-    }
+      // رسم حقول شذوذ ثقوب الجاذبية
+      for (const well of G.gravityWells) {
+        ctx.save();
+        ctx.translate(well.x, well.y);
+        ctx.rotate(well.rotation);
 
-    // كود مصفوفة البيانات بالخلفية
-    for (const p of g.bgCodes) {
-      ctx.fillStyle = `rgba(56,189,248,${p.alpha})`; ctx.font = `${p.size}px monospace`;
-      ctx.fillText(p.txt, p.x, p.y);
-    }
+        ctx.strokeStyle = 'rgba(249, 115, 22, 0.45)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, well.radius, 0, Math.PI * 1.5);
+        ctx.stroke();
 
-    // الليزرات الحية
-    for (const las of g.lasers) {
-      if (las.active) {
-        ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 15;
-        ctx.fillStyle = 'rgba(244,63,94,0.85)'; ctx.fillRect(0, las.y, WORLD_WIDTH, las.h);
-        ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(0, las.y + 1, WORLD_WIDTH, las.h / 2);
+        ctx.strokeStyle = 'rgba(236, 72, 153, 0.35)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, well.radius - 12, 0, Math.PI * 2);
+        ctx.stroke();
+
+        const grad = ctx.createRadialGradient(0, 0, 1, 0, 0, 16);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.5, '#ec4899');
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 16, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // رسم كود الخلفية الثنائي
+      for (const p of G.bgCodes) {
+        ctx.fillStyle = `rgba(56,189,248,${p.alpha})`; ctx.font = `${p.size}px monospace`;
+        ctx.fillText(p.txt, p.x, p.y);
+      }
+
+      // رسم الليزرات الأمنية الحية
+      for (const las of G.lasers) {
+        if (las.active) {
+          ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 15;
+          ctx.fillStyle = 'rgba(244,63,94,0.85)'; ctx.fillRect(0, las.y, WORLD_WIDTH, las.h);
+          ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(0, las.y + 1, WORLD_WIDTH, las.h / 2);
+          ctx.shadowBlur = 0;
+        } else { ctx.fillStyle = 'rgba(244,63,94,0.15)'; ctx.fillRect(0, las.y, WORLD_WIDTH, 1); }
+      }
+
+      // رسم المنصات والـ KPIs
+      for (const plat of G.platforms) {
+        if (plat.hasCollapsed) continue;
+        if (plat.y < G.cameraY - 100 || plat.y > G.cameraY + canvas.height / G.scale + 100) continue;
+        ctx.save();
+        if (plat.shake > 0) ctx.translate(plat.shake, 0);
+        if (plat.type === 'base') {
+          ctx.fillStyle = '#0f172a'; ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+          ctx.strokeStyle = 'rgba(56,189,248,0.5)'; ctx.lineWidth = 3; ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
+        } else {
+          ctx.fillStyle = 'rgba(15,23,42,0.95)'; ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+          let sc = 'rgba(56,189,248,0.6)';
+          if (plat.type === 'gauge') sc = 'rgba(192,132,252,0.7)';
+          if (plat.type === 'collapsible') sc = 'rgba(244,63,94,0.7)';
+          if (plat.type === 'summit') sc = 'rgba(16,185,129,0.8)';
+          ctx.strokeStyle = sc; ctx.lineWidth = 2.5; ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
+
+          if (plat.type === 'bar') {
+            ctx.fillStyle = 'rgba(56,189,248,0.25)';
+            const bCount = 6; const bWidth = (plat.width - 24) / bCount;
+            for (let j = 0; j < bCount; j++) { let bh = (plat.height - 12) * ((j + 1) / bCount); ctx.fillRect(plat.x + 12 + j * bWidth, plat.y + plat.height - bh - 6, bWidth - 3, bh); }
+          } else if (plat.type === 'gauge') {
+            ctx.strokeStyle = 'rgba(192,132,252,0.35)'; ctx.beginPath(); ctx.arc(plat.x + 30, plat.y + plat.height / 2, 8, 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(plat.x + 30, plat.y + plat.height / 2, 4, 0, Math.PI * 2); ctx.fill();
+          } else if (plat.type === 'collapsible') {
+            ctx.fillStyle = 'rgba(244,63,94,0.15)'; ctx.fillRect(plat.x + 4, plat.y + 4, plat.width - 8, plat.height - 8);
+            ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 8px Cairo'; ctx.fillText('⚠️ تآكل متسارع', plat.x + 15, plat.y + 18);
+          }
+          ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = 'bold 9px Cairo'; ctx.textAlign = 'right';
+          ctx.fillText(plat.title, plat.x + plat.width - 12, plat.y + 18);
+        }
+        ctx.restore();
+      }
+
+      // رسم وحش الزعيم (وحش الاحتراق)
+      if (G.boss && G.boss.health > 0) {
+        ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 20;
+        ctx.fillStyle = 'rgba(15,23,42,0.95)'; ctx.fillRect(G.boss.x, G.boss.y, G.boss.width, G.boss.height);
+        ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 4; ctx.strokeRect(G.boss.x, G.boss.y, G.boss.width, G.boss.height);
         ctx.shadowBlur = 0;
-      } else { ctx.fillStyle = 'rgba(244,63,94,0.15)'; ctx.fillRect(0, las.y, WORLD_WIDTH, 1); }
-    }
-
-    // رسم المنصات الرقمية
-    for (const plat of g.platforms) {
-      if (plat.hasCollapsed) continue;
-      if (plat.y < g.cameraY - 100 || plat.y > g.cameraY + canvas.height / g.scale + 100) continue;
-      ctx.save();
-      if (plat.shake > 0) ctx.translate(plat.shake, 0);
-      if (plat.type === 'base') {
-        ctx.fillStyle = '#0f172a'; ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
-        ctx.strokeStyle = 'rgba(56,189,248,0.5)'; ctx.lineWidth = 3; ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
-      } else {
-        ctx.fillStyle = 'rgba(15,23,42,0.95)'; ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
-        let sc = 'rgba(56,189,248,0.6)';
-        if (plat.type === 'gauge') sc = 'rgba(192,132,252,0.7)';
-        if (plat.type === 'collapsible') sc = 'rgba(244,63,94,0.7)';
-        if (plat.type === 'summit') sc = 'rgba(16,185,129,0.8)';
-        ctx.strokeStyle = sc; ctx.lineWidth = 2.5; ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
-
-        if (plat.type === 'bar') {
-          ctx.fillStyle = 'rgba(56,189,248,0.25)';
-          const bCount = 6; const bWidth = (plat.width - 24) / bCount;
-          for (let j = 0; j < bCount; j++) { let bh = (plat.height - 12) * ((j + 1) / bCount); ctx.fillRect(plat.x + 12 + j * bWidth, plat.y + plat.height - bh - 6, bWidth - 3, bh); }
-        } else if (plat.type === 'gauge') {
-          ctx.strokeStyle = 'rgba(192,132,252,0.35)'; ctx.beginPath(); ctx.arc(plat.x + 30, plat.y + plat.height / 2, 8, 0, Math.PI * 2); ctx.stroke();
-          ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(plat.x + 30, plat.y + plat.height / 2, 4, 0, Math.PI * 2); ctx.fill();
-        } else if (plat.type === 'collapsible') {
-          ctx.fillStyle = 'rgba(244,63,94,0.15)'; ctx.fillRect(plat.x + 4, plat.y + 4, plat.width - 8, plat.height - 8);
-          ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 8px Cairo'; ctx.fillText('⚠️ تآكل متسارع', plat.x + 15, plat.y + 18);
-        }
-        ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = 'bold 9px Cairo'; ctx.textAlign = 'right';
-        ctx.fillText(plat.title, plat.x + plat.width - 12, plat.y + 18);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(G.boss.x + 20, G.boss.y + 15, 12, 12);
+        ctx.fillRect(G.boss.x + G.boss.width - 32, G.boss.y + 15, 12, 12);
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillRect(G.boss.x + 24, G.boss.y + 19, 4, 4);
+        ctx.fillRect(G.boss.x + G.boss.width - 28, G.boss.y + 19, 4, 4);
+        ctx.fillStyle = '#1e293b'; ctx.fillRect(G.boss.x, G.boss.y - 15, G.boss.width, 6);
+        ctx.fillStyle = '#f43f5e'; ctx.fillRect(G.boss.x, G.boss.y - 15, G.boss.width * (G.boss.health / G.boss.maxHealth), 6);
+        ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 9px Cairo'; ctx.textAlign = 'center';
+        ctx.fillText("وحش الاحتراق النفسي والضغط", G.boss.x + G.boss.width / 2, G.boss.y - 22);
       }
-      ctx.restore();
-    }
 
-    // رسم وحش الزعيم (زعيم الاحتراق والضغوط الشديدة)
-    if (g.boss && g.boss.health > 0) {
-      ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 20;
-      ctx.fillStyle = 'rgba(15,23,42,0.95)'; ctx.fillRect(g.boss.x, g.boss.y, g.boss.width, g.boss.height);
-      ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 4; ctx.strokeRect(g.boss.x, g.boss.y, g.boss.width, g.boss.height);
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(g.boss.x + 20, g.boss.y + 15, 12, 12);
-      ctx.fillRect(g.boss.x + g.boss.width - 32, g.boss.y + 15, 12, 12);
+      // رسم الأخطاء المتساقطة لعاصفة الأخطاء
+      for (const err of G.fallingErrors) {
+        ctx.save();
+        ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 10;
+        ctx.fillStyle = '#ef4444';
+        ctx.translate(err.x + err.width / 2, err.y + err.height / 2);
+        ctx.rotate(err.pulse);
+        ctx.fillRect(-err.width / 2, -err.height / 2, err.width, err.height);
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 9px Cairo';
+        ctx.fillText('⚡', -4, 4);
+        ctx.restore();
+      }
+
+      // مقذوفات الأعداء ونور
       ctx.fillStyle = '#f43f5e';
-      ctx.fillRect(g.boss.x + 24, g.boss.y + 19, 4, 4);
-      ctx.fillRect(g.boss.x + g.boss.width - 28, g.boss.y + 19, 4, 4);
-      ctx.fillStyle = '#1e293b'; ctx.fillRect(g.boss.x, g.boss.y - 15, g.boss.width, 6);
-      ctx.fillStyle = '#f43f5e'; ctx.fillRect(g.boss.x, g.boss.y - 15, g.boss.width * (g.boss.health / g.boss.maxHealth), 6);
-      ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 9px Cairo'; ctx.textAlign = 'center';
-      ctx.fillText("وحش الاحتراق النفسي والضغط", g.boss.x + g.boss.width / 2, g.boss.y - 22);
-    }
+      for (const bp of G.bossProjectiles) ctx.fillRect(bp.x, bp.y, bp.width, bp.height);
 
-    // رسم الأخطاء المتساقطة لعاصفة الأخطاء
-    for (const err of g.fallingErrors) {
-      ctx.save();
-      ctx.shadowColor = '#ef4444';
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = '#ef4444';
-      ctx.translate(err.x + err.width / 2, err.y + err.height / 2);
-      ctx.rotate(err.pulse);
-      ctx.fillRect(-err.width / 2, -err.height / 2, err.width, err.height);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 9px Cairo';
-      ctx.fillText('⚡', -4, 4);
-      ctx.restore();
-    }
-
-    // مقذوفات الأخطاء والزعيم
-    ctx.fillStyle = '#f43f5e';
-    for (const bp of g.bossProjectiles) ctx.fillRect(bp.x, bp.y, bp.width, bp.height);
-
-    // مقذوفات الأمان لنور
-    ctx.fillStyle = '#10b981';
-    for (const pp of g.playerProjectiles) ctx.fillRect(pp.x, pp.y, pp.width, pp.height);
-
-    // العناصر التفاعلية
-    for (const item of g.items) {
-      const bounce = Math.sin(item.pulse || 0) * 4;
-      if (item.type === 'token') {
-        ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 12; ctx.fillStyle = '#38bdf8';
-        ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 9, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 4, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
-      } else if (item.type === 'security_patch') {
-        ctx.shadowColor = '#10b981'; ctx.shadowBlur = 15; ctx.fillStyle = '#10b981';
-        ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 9, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 8px Cairo'; ctx.textAlign = 'center';
-        ctx.fillText('🛡️', item.x, item.y + bounce + 3); ctx.shadowBlur = 0;
-      } else if (item.type === 'green_metric') {
-        ctx.shadowColor = '#10b981'; ctx.shadowBlur = 15; ctx.fillStyle = '#10b981';
-        ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 9, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-      } else if (item.type === 'red_metric') {
-        ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 12; ctx.fillStyle = '#f43f5e';
-        ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 8, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-      } else if (item.type === 'team_npc' || item.type === 'board_npc') {
-        ctx.fillStyle = item.type === 'board_npc' ? '#f59e0b' : '#a855f7';
-        ctx.fillRect(item.x - 11, item.y - 32, 22, 32);
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(item.x - 11, item.y - 32, 22, 32);
-        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 8px Cairo'; ctx.textAlign = 'center';
-        ctx.fillText(item.name, item.x, item.y - 38);
-      } else if (item.type === 'summit_gateway') {
-        ctx.shadowColor = '#10b981'; ctx.shadowBlur = 25; ctx.fillStyle = '#10b981';
-        ctx.fillRect(item.x - 18, item.y - 18, 36, 36);
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.strokeRect(item.x - 18, item.y - 18, 36, 36);
-        ctx.shadowBlur = 0;
-      }
-    }
-
-    // الأعداء (الفيروسات)
-    for (const e of g.enemies) {
-      const bounce = Math.sin(e.pulse) * 3;
-      ctx.fillStyle = '#f43f5e'; ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 12;
-      ctx.fillRect(e.x, e.y + bounce, e.width, e.height); ctx.shadowBlur = 0;
       ctx.fillStyle = '#10b981';
-      ctx.fillRect(e.x + 4, e.y + bounce + 4, 4, 4);
-      ctx.fillRect(e.x + e.width - 8, e.y + bounce + 4, 4, 4);
-    }
+      for (const pp of G.playerProjectiles) ctx.fillRect(pp.x, pp.y, pp.width, pp.height);
 
-    // 🎨 رسم البطلة نور المحدثة بالكامل (Cyber Noor) بشكل بطلة خارقة سيبرانية 🎨
-    const pl = g.player;
-    pl.pulse += 0.14;
+      // رسم العناصر والمكتشفات
+      for (const item of G.items) {
+        const bounce = Math.sin(item.pulse || 0) * 4;
+        if (item.type === 'token') {
+          ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 12; ctx.fillStyle = '#38bdf8';
+          ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 9, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 4, 0, Math.PI * 2); ctx.fill();
+          ctx.shadowBlur = 0;
+        } else if (item.type === 'security_patch') {
+          ctx.shadowColor = '#10b981'; ctx.shadowBlur = 15; ctx.fillStyle = '#10b981';
+          ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 9, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 8px Cairo'; ctx.textAlign = 'center';
+          ctx.fillText('🛡️', item.x, item.y + bounce + 3); ctx.shadowBlur = 0;
+        } else if (item.type === 'green_metric') {
+          ctx.shadowColor = '#10b981'; ctx.shadowBlur = 15; ctx.fillStyle = '#10b981';
+          ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 9, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        } else if (item.type === 'red_metric') {
+          ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 12; ctx.fillStyle = '#f43f5e';
+          ctx.beginPath(); ctx.arc(item.x, item.y + bounce, 8, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        } else if (item.type === 'team_npc' || item.type === 'board_npc') {
+          ctx.fillStyle = item.type === 'board_npc' ? '#f59e0b' : '#a855f7';
+          ctx.fillRect(item.x - 11, item.y - 32, 22, 32);
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(item.x - 11, item.y - 32, 22, 32);
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 8px Cairo'; ctx.textAlign = 'center';
+          ctx.fillText(item.name, item.x, item.y - 38);
+        } else if (item.type === 'summit_gateway') {
+          ctx.shadowColor = '#10b981'; ctx.shadowBlur = 25; ctx.fillStyle = '#10b981';
+          ctx.fillRect(item.x - 18, item.y - 18, 36, 36);
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.strokeRect(item.x - 18, item.y - 18, 36, 36);
+          ctx.shadowBlur = 0;
+        }
+      }
 
-    // رسم أطياف أشباح نيون الاندفاع الخرافية (Dash Ghost Trails)
-    for (const trail of pl.dashTrail) {
+      // رسم الأعداء (الفيروسات)
+      for (const e of G.enemies) {
+        const bounce = Math.sin(e.pulse) * 3;
+        ctx.fillStyle = '#f43f5e'; ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 12;
+        ctx.fillRect(e.x, e.y + bounce, e.width, e.height); ctx.shadowBlur = 0;
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(e.x + 4, e.y + bounce + 4, 4, 4);
+        ctx.fillRect(e.x + e.width - 8, e.y + bounce + 4, 4, 4);
+      }
+
+      // رسم البطلة نور بالتفاصيل السيبرانية المتقدمة
+      const pl = G.player;
+      pl.pulse += 0.14;
+
+      // أطياف نيون الاندفاع
+      for (const trail of pl.dashTrail) {
+        ctx.save();
+        ctx.globalAlpha = trail.alpha;
+        ctx.shadowColor = 'rgba(56,189,248,0.7)'; ctx.shadowBlur = 15;
+        ctx.fillStyle = 'rgba(56,189,248,0.3)';
+        ctx.fillRect(trail.x, trail.y, pl.width, pl.height);
+        ctx.restore();
+      }
+
       ctx.save();
-      ctx.globalAlpha = trail.alpha;
-      ctx.shadowColor = 'rgba(56,189,248,0.7)';
-      ctx.shadowBlur = 15;
-      ctx.fillStyle = 'rgba(56,189,248,0.3)';
-      ctx.fillRect(trail.x, trail.y, pl.width, pl.height);
+
+      // تغيير لون خوذة الوهج السيبراني حسب مستوى التوتر
+      let visorColor = '#38bdf8';
+      let glowColor = 'rgba(56, 189, 248, 0.4)';
+      if (G.stressIndex > 72) {
+        visorColor = '#f43f5e';
+        glowColor = 'rgba(244, 63, 94, 0.5)';
+      } else if (G.stressIndex > 45) {
+        visorColor = '#f59e0b';
+        glowColor = 'rgba(245, 158, 11, 0.45)';
+      }
+
+      const bodyGlow = 10 + Math.sin(pl.pulse) * 4;
+      ctx.shadowColor = visorColor; ctx.shadowBlur = bodyGlow;
+
+      // 1. رسم الوشاح المضيء فيزيائياً
+      if (pl.scarfPoints.length > 1) {
+        ctx.strokeStyle = visorColor; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(pl.scarfPoints[0].x, pl.scarfPoints[0].y);
+        for (let i = 1; i < pl.scarfPoints.length; i++) { ctx.lineTo(pl.scarfPoints[i].x, pl.scarfPoints[i].y); }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(pl.scarfPoints[0].x, pl.scarfPoints[0].y);
+        for (let i = 1; i < pl.scarfPoints.length; i++) { ctx.lineTo(pl.scarfPoints[i].x, pl.scarfPoints[i].y); }
+        ctx.stroke();
+      }
+
+      // 2. جسد البطلة نور (سترة درع الأمان السيبرانية الداكنة)
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(pl.x + 4, pl.y + 24, pl.width - 8, 14);
+      ctx.fillStyle = '#1e293b'; ctx.fillRect(pl.x + 2, pl.y + 12, pl.width - 4, 14);
+      ctx.strokeStyle = visorColor; ctx.lineWidth = 1.5; ctx.strokeRect(pl.x + 3, pl.y + 13, pl.width - 6, 12);
+
+      // 3. رأس الخوذة وسماعات النيون اللطيفة
+      ctx.fillStyle = '#020617'; ctx.beginPath(); ctx.arc(pl.x + pl.width / 2, pl.y + 8, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = visorColor; ctx.beginPath(); ctx.arc(pl.x + (pl.faceDir === 1 ? 2 : pl.width - 2), pl.y + 8, 3, 0, Math.PI * 2); ctx.fill();
+
+      // 4. قناع العين السيبراني (Dynamic Visor)
+      ctx.fillStyle = visorColor;
+      const visorX = pl.faceDir === 1 ? pl.x + pl.width / 2 - 1 : pl.x + 2;
+      ctx.fillRect(visorX, pl.y + 5, 11, 4);
+
+      ctx.restore();
+
+      // 5. المساعد الآلي الطائر الدوار (Noor Companion Drone)
+      const droneAngle = pl.pulse * 0.8;
+      const droneRadius = 26;
+      const droneX = pl.x + pl.width / 2 + Math.cos(droneAngle) * droneRadius;
+      const droneY = pl.y + pl.height / 2 + Math.sin(droneAngle) * droneRadius * 0.6;
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pl.x + pl.width / 2, pl.y + pl.height / 2); ctx.lineTo(droneX, droneY); ctx.stroke();
+
+      ctx.save();
+      ctx.shadowColor = visorColor; ctx.shadowBlur = 8;
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = visorColor; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(droneX, droneY, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = visorColor; ctx.beginPath(); ctx.arc(droneX, droneY, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
       ctx.restore();
     }
 
-    ctx.save();
-
-    // تحديد ألوان الخوذة والوهج السيبراني بناءً على مستوى توتر نور
-    let visorColor = '#38bdf8'; // مستقر وسعيد
-    let glowColor = 'rgba(56, 189, 248, 0.4)';
-    if (g.stressIndex > 72) {
-      visorColor = '#f43f5e'; // متوتر جداً أو مهدد بالاحتراق
-      glowColor = 'rgba(244, 63, 94, 0.5)';
-    } else if (g.stressIndex > 45) {
-      visorColor = '#f59e0b'; // مضغوط وبداية توتر
-      glowColor = 'rgba(245, 158, 11, 0.45)';
-    }
-
-    // الوهج السيبراني المحيط بنور
-    const bodyGlow = 10 + Math.sin(pl.pulse) * 4;
-    ctx.shadowColor = visorColor;
-    ctx.shadowBlur = bodyGlow;
-
-    // 1. رسم الوشاح النيوني المتدفق فيزيائياً
-    if (pl.scarfPoints.length > 1) {
-      ctx.strokeStyle = visorColor;
-      ctx.lineWidth = 5;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.beginPath();
-      ctx.moveTo(pl.scarfPoints[0].x, pl.scarfPoints[0].y);
-      for (let i = 1; i < pl.scarfPoints.length; i++) {
-        ctx.lineTo(pl.scarfPoints[i].x, pl.scarfPoints[i].y);
-      }
-      ctx.stroke();
-
-      // رسم خط داخلي نيون أبيض للوشاح لجمال بصري
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(pl.scarfPoints[0].x, pl.scarfPoints[0].y);
-      for (let i = 1; i < pl.scarfPoints.length; i++) {
-        ctx.lineTo(pl.scarfPoints[i].x, pl.scarfPoints[i].y);
-      }
-      ctx.stroke();
-    }
-
-    // 2. رسم جسد البطلة نور (الملابس السيبرانية الداكنة)
-    ctx.fillStyle = '#0f172a'; // الساقين والحوض
-    ctx.fillRect(pl.x + 4, pl.y + 24, pl.width - 8, 14);
-
-    ctx.fillStyle = '#1e293b'; // سترة درع الأمان
-    ctx.fillRect(pl.x + 2, pl.y + 12, pl.width - 4, 14);
-
-    // تفاصيل الدرع النيونية المتفاعلة
-    ctx.strokeStyle = visorColor;
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(pl.x + 3, pl.y + 13, pl.width - 6, 12);
-
-    // 3. الرأس والخوذة وسماعات النيون اللطيفة
-    ctx.fillStyle = '#020617';
-    ctx.beginPath();
-    ctx.arc(pl.x + pl.width / 2, pl.y + 8, 8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // سماعات الرأس النيونية المضيئة
-    ctx.fillStyle = visorColor;
-    ctx.beginPath();
-    ctx.arc(pl.x + (pl.faceDir === 1 ? 2 : pl.width - 2), pl.y + 8, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 4. قناع العين السيبراني المضيء والمتفاعل (Dynamic Visor)
-    ctx.fillStyle = visorColor;
-    const visorX = pl.faceDir === 1 ? pl.x + pl.width / 2 - 1 : pl.x + 2;
-    ctx.fillRect(visorX, pl.y + 5, 11, 4);
-
-    ctx.restore();
-
-    // 5. رسم المساعد الآلي الطائر الدوار (Noor Companion Drone)
-    const droneAngle = pl.pulse * 0.8;
-    const droneRadius = 26;
-    const droneX = pl.x + pl.width / 2 + Math.cos(droneAngle) * droneRadius;
-    const droneY = pl.y + pl.height / 2 + Math.sin(droneAngle) * droneRadius * 0.6;
-
-    // شعاع ربط ناصع خفيف بين نور والدرون المساعد
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(pl.x + pl.width / 2, pl.y + pl.height / 2);
-    ctx.lineTo(droneX, droneY);
-    ctx.stroke();
-
-    // الدرون المساعد الصغير
-    ctx.save();
-    ctx.shadowColor = visorColor;
-    ctx.shadowBlur = 8;
-    ctx.fillStyle = '#1e293b';
-    ctx.strokeStyle = visorColor;
-    ctx.lineWidth = 1.5;
-
-    ctx.beginPath();
-    ctx.arc(droneX, droneY, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // عيون الدرون المضيئة الصغيرة
-    ctx.fillStyle = visorColor;
-    ctx.beginPath();
-    ctx.arc(droneX, droneY, 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
-
-    ctx.restore();
-  }, []);
-
-  // حلقة اللعبة المستمرة والرسومية
-  useEffect(() => {
     let raf;
-    const loop = () => { updatePhysics(); updateEntities(); drawGame(); raf = requestAnimationFrame(loop); };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [updatePhysics, updateEntities, drawGame]);
+    function gameLoop() {
+      updatePhysics();
+      updateEntities();
+      drawGame();
+      raf = requestAnimationFrame(gameLoop);
+    }
 
-  // إدارة ضبط الحجم ومراعاة الشاشات للأجهزة المختلفة
-  useEffect(() => {
-    const resize = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+    // التعامل مع تغير مساحة الشاشة
+    function resize() {
       const c = canvas.parentElement;
       let w = c ? c.clientWidth : window.innerWidth;
       let h = c ? c.clientHeight : window.innerHeight - 80;
       if (w <= 0 || h <= 0) { w = window.innerWidth; h = window.innerHeight - 80; }
       canvas.width = w; canvas.height = h;
-      const g = G.current;
-      g.scale = canvas.width / WORLD_WIDTH;
-      if (g.scale <= 0) g.scale = 1;
-      g.cameraY = Math.max(0, Math.min(WORLD_HEIGHT - h / g.scale, g.cameraY));
-    };
-    resize();
-    window.addEventListener('resize', resize);
-    return () => window.removeEventListener('resize', resize);
-  }, []);
+      G.scale = canvas.width / WORLD_WIDTH;
+      if (G.scale <= 0) G.scale = 1;
+      G.cameraY = Math.max(0, Math.min(WORLD_HEIGHT - h / G.scale, G.cameraY));
+    }
 
-  // إدارة مستمعي لوحة المفاتيح
-  useEffect(() => {
-    const down = (e) => {
-      G.current.keys[e.code] = true;
+    window.addEventListener('resize', resize);
+
+    window.addEventListener('keydown', (e) => {
+      G.keys[e.code] = true;
       if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
         e.preventDefault();
-        if (G.current.isPlaying) {
-          const p = G.current.player;
-          if (p.isGrounded) { p.vy = G.current.jumpStrength; p.isGrounded = false; p.doubleJump = true; AudioSynth.play('jump', isMutedRef.current); }
-          else if (p.doubleJump) { p.vy = G.current.jumpStrength * 0.85; p.doubleJump = false; AudioSynth.play('jump', isMutedRef.current); }
-        }
+        handleJump();
       }
-      // اندفاع خارق بالضغط على مفتاح Shift الأيسر أو الأيمن
       if (['ShiftLeft', 'ShiftRight'].includes(e.code)) {
         e.preventDefault();
         triggerDash();
       }
       if (e.code === 'Escape') {
-        if (G.current.isPlaying) { G.current.isPlaying = false; G.current.isPaused = true; setPauseObjective(STAGES[G.current.currentLevel - 1].objective); setShowPause(true); }
-        else if (G.current.isPaused) { G.current.isPlaying = true; G.current.isPaused = false; setShowPause(false); }
+        if (G.isPlaying) {
+          G.isPlaying = false;
+          G.isPaused = true;
+          document.getElementById('pause-objective-text').innerText = STAGES[G.currentLevel - 1].objective;
+          document.getElementById('pause-overlay').classList.remove('hidden');
+        } else if (G.isPaused) {
+          G.isPlaying = true;
+          G.isPaused = false;
+          document.getElementById('pause-overlay').classList.add('hidden');
+        }
+      }
+    });
+
+    window.addEventListener('keyup', (e) => { G.keys[e.code] = false; });
+
+    function preventAndTrigger(elementId, eventType, callback) {
+      const el = document.getElementById(elementId);
+      el.addEventListener(eventType, (e) => {
+        e.preventDefault();
+        callback();
+      });
+    }
+
+    preventAndTrigger('ctrl-left', 'touchstart', () => { G.touchLeft = true; });
+    preventAndTrigger('ctrl-left', 'touchend', () => { G.touchLeft = false; });
+    preventAndTrigger('ctrl-right', 'touchstart', () => { G.touchRight = true; });
+    preventAndTrigger('ctrl-right', 'touchend', () => { G.touchRight = false; });
+
+    document.getElementById('ctrl-left').addEventListener('touchcancel', () => { G.touchLeft = false; });
+    document.getElementById('ctrl-right').addEventListener('touchcancel', () => { G.touchRight = false; });
+
+    preventAndTrigger('ctrl-jump', 'touchstart', handleJump);
+    preventAndTrigger('ctrl-dash', 'touchstart', triggerDash);
+
+    // ربط واجهات الأزرار التفاعلية
+    document.getElementById('btn-mute').onclick = () => {
+      isMuted = !isMuted;
+      const icon = document.getElementById('btn-mute').querySelector('i');
+      if (isMuted) {
+        icon.className = "fa-solid fa-volume-xmark text-slate-500 text-xs";
+      } else {
+        icon.className = "fa-solid fa-volume-high text-sky-400 text-xs";
+        AudioSynth.play('collect', false);
       }
     };
-    const up = (e) => { G.current.keys[e.code] = false; };
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
-    return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
-  }, [triggerDash]);
 
-  // تهيئة مستويات الحفظ ومستوى البدء والتنزيل الأول
-  useEffect(() => {
-    G.current.unlockedLevel = parseInt(SafeStorage.get('noor_unlocked_level', '1'));
-    setUnlockedLevel(G.current.unlockedLevel);
+    document.getElementById('btn-pause').onclick = () => {
+      if (G.isPlaying) {
+        G.isPlaying = false;
+        G.isPaused = true;
+        document.getElementById('pause-objective-text').innerText = STAGES[G.currentLevel - 1].objective;
+        document.getElementById('pause-overlay').classList.remove('hidden');
+      }
+    };
+
+    document.getElementById('btn-resume').onclick = () => {
+      G.isPlaying = true;
+      G.isPaused = false;
+      document.getElementById('pause-overlay').classList.add('hidden');
+    };
+
+    document.getElementById('btn-abort').onclick = () => {
+      G.isPlaying = false;
+      document.getElementById('pause-overlay').classList.add('hidden');
+      document.getElementById('welcome-overlay').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-sensory').onclick = () => {
+      document.getElementById('sensory-overlay').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-close-sensory').onclick = () => {
+      document.getElementById('sensory-overlay').classList.add('hidden');
+    };
+    document.getElementById('btn-dismiss-sensory').onclick = () => {
+      document.getElementById('sensory-overlay').classList.add('hidden');
+    };
+
+    window.selectDifficulty = function(lvl) {
+      applyDifficulty(lvl);
+    };
+
+    window.rebuildWithDiff = function(lvl) {
+      applyDifficulty(lvl);
+      buildWorld();
+      G.isPlaying = true;
+      G.isPaused = false;
+      document.getElementById('pause-overlay').classList.add('hidden');
+      syncHUD();
+    };
+
+    window.selectStage = function(id) {
+      if (id > unlockedLevel) {
+        logEvent("هذا القطاع مقفل حتى إنقاذ القطاعات السابقة أولاً!", 'error');
+        return;
+      }
+      selectedLevel = id;
+      G.currentLevel = id;
+      buildWorld();
+      setupStagesGrid();
+    };
+
+    // تجهيز قائمة المراحل البرمجية
+    function setupStagesGrid() {
+      const grid = document.getElementById('stages-grid');
+      grid.innerHTML = '';
+      STAGES.forEach(stage => {
+        const isUnlocked = stage.id <= unlockedLevel;
+        const isSelected = stage.id === selectedLevel;
+        const isBoss = stage.objType === 'boss';
+
+        const div = document.createElement('div');
+        div.className = `p-2.5 rounded-xl border text-right relative overflow-hidden transition-all ${
+          isSelected ? 'border-sky-500 bg-sky-500/10 text-sky-300' : isUnlocked ? 'border-white/10 bg-white/5 text-slate-200 cursor-pointer' : 'border-white/5 bg-black/20 text-slate-600 opacity-50 cursor-not-allowed'
+        }`;
+        
+        if (isUnlocked) {
+          div.onclick = () => selectStage(stage.id);
+        }
+
+        div.innerHTML = `
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[8px] font-bold ${isBoss ? 'text-rose-400 bg-rose-500/10' : 'text-sky-400 bg-sky-500/10'} p-0.5 px-1.5 rounded-full">مرحلة ${stage.id}</span>
+            <span class="text-[10px]">${!isUnlocked ? '🔒' : isSelected ? '🟢' : isBoss ? '🔥' : '⚪'}</span>
+          </div>
+          <h4 class="text-[10px] font-black m-0 leading-tight">${stage.title}</h4>
+          <p class="text-[8px] text-slate-500 m-0 mt-1 truncate">${stage.chapter}</p>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    // إطلاق محاكاة اللعب من الترحيب
+    document.getElementById('btn-launch').onclick = () => {
+      G.currentLevel = selectedLevel;
+      buildWorld();
+      syncHUD();
+      document.getElementById('welcome-overlay').classList.add('hidden');
+      G.isPlaying = true;
+      G.isPaused = false;
+      AudioSynth.play('success', isMuted);
+      logEvent(`تم تهيئة وتحميل: قطاع ${STAGES[selectedLevel - 1].title}`, 'success');
+    };
+
+    // إعادة الضبط بعد النجاح الكلي
+    document.getElementById('btn-reset-game').onclick = () => {
+      document.getElementById('victory-overlay').classList.add('hidden');
+      G.currentLevel = 1;
+      selectedLevel = 1;
+      unlockedLevel = 1;
+      SafeStorage.set('noor_unlocked_level', 1);
+      buildWorld();
+      setupStagesGrid();
+      document.getElementById('welcome-overlay').classList.remove('hidden');
+      syncHUD();
+    };
+
+    // بدء وإطلاق المحاكي الإرشادي الأول
+    resize();
     applyDifficulty('medium');
     buildWorld();
+    setupStagesGrid();
     syncHUD();
-  }, []);
-
-  const handleLaunch = () => {
-    G.current.currentLevel = selectedLevel;
-    buildWorld();
-    syncHUD();
-    setShowWelcome(false);
-    G.current.isPlaying = true;
-    G.current.isPaused = false;
-    AudioSynth.play('success', isMutedRef.current);
-    logEvent(`تم تهيئة وتحميل: قطاع ${STAGES[selectedLevel - 1].title}`, 'success');
-  };
-
-  const handleSelectStage = (id) => {
-    if (id > G.current.unlockedLevel) { logEvent("هذا القطاع مقفل حتى إنقاذ القطاعات السابقة أولاً!", 'error'); return; }
-    setSelectedLevel(id);
-    G.current.currentLevel = id;
-    buildWorld();
-  };
-
-  const handleDifficultyChange = (lvl) => {
-    applyDifficulty(lvl);
-    setDifficultyState(lvl);
-  };
-
-  const handleResume = () => { G.current.isPlaying = true; G.current.isPaused = false; setShowPause(false); };
-
-  const handleAbortToMenu = () => { G.current.isPlaying = false; setShowPause(false); setShowWelcome(true); };
-
-  const handleRebuildAndResume = (lvl) => {
-    applyDifficulty(lvl);
-    buildWorld();
-    G.current.isPlaying = true;
-    G.current.isPaused = false;
-    setShowPause(false);
-    syncHUD();
-  };
-
-  const handleToggleMute = () => {
-    const next = !isMutedRef.current;
-    isMutedRef.current = next;
-    setIsMuted(next);
-    if (!next) AudioSynth.play('collect', false);
-  };
-
-  const handleJump = () => {
-    if (!G.current.isPlaying) return;
-    const p = G.current.player;
-    if (p.isGrounded) { p.vy = G.current.jumpStrength; p.isGrounded = false; p.doubleJump = true; AudioSynth.play('jump', isMutedRef.current); }
-    else if (p.doubleJump) { p.vy = G.current.jumpStrength * 0.85; p.doubleJump = false; AudioSynth.play('jump', isMutedRef.current); }
-  };
-
-  const handleResetGameAfterVictory = () => {
-    setShowVictory(false);
-    const g = G.current;
-    g.currentLevel = 1;
-    setSelectedLevel(1);
-    g.unlockedLevel = 1;
-    SafeStorage.set('noor_unlocked_level', 1);
-    setUnlockedLevel(1);
-    buildWorld();
-    setShowWelcome(true);
-    syncHUD();
-  };
-
-  return (
-    <div dir="rtl" style={{ fontFamily: "'Cairo', sans-serif", background: '#020617', width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', color: '#f1f5f9', overflow: 'hidden', userSelect: 'none' }}>
-      {/* استدعاء خطوط وأيقونات Google و FontAwesome */}
-      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-      {/* لوحة الواجهة العلوية للبيانات HUD */}
-      <header style={{ background: 'rgba(2,6,23,0.98)', borderBottom: '1px solid rgba(56,189,248,0.18)', padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, zIndex: 30, gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg,rgba(56,189,248,0.2),rgba(99,102,241,0.2))', border: '1.5px solid rgba(56,189,248,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7dd3fc', fontWeight: 900, fontSize: 15, flexShrink: 0 }}>ن</div>
-          <div style={{ minWidth: 0 }}>
-            <h1 style={{ fontSize: 11, fontWeight: 900, color: '#38bdf8', textShadow: '0 0 8px rgba(56,189,248,0.7)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>نور: صعود لوحة البيانات</h1>
-            <p style={{ fontSize: 9, color: '#64748b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{hudStageTitle}</p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 8, color: '#fb7185', fontWeight: 700 }}>التراكم النفسي</span>
-            <span style={{ fontSize: 10, fontWeight: 900, color: stressDisplay > 72 ? '#f43f5e' : stressDisplay > 45 ? '#f59e0b' : '#10b981' }}>{stressDisplay}%</span>
-          </div>
-          <div style={{ width: 72, background: '#0f172a', borderRadius: 999, height: 6, overflow: 'hidden', border: '1px solid rgba(56,189,248,0.15)' }}>
-            <div style={{ width: `${stressDisplay}%`, height: '100%', background: stressDisplay > 72 ? '#f43f5e' : stressDisplay > 45 ? '#f59e0b' : '#10b981', transition: 'width 0.3s, background 0.3s', borderRadius: 999 }} />
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-          <button onClick={handleToggleMute}
-            style={{ width: 34, height: 34, borderRadius: 10, background: '#0f172a', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            <i className={`fa-solid ${isMuted ? 'fa-volume-xmark' : 'fa-volume-high'}`} style={{ fontSize: 13, color: isMuted ? '#475569' : '#38bdf8' }} />
-          </button>
-          <button onClick={() => { G.current.isPlaying = false; G.current.isPaused = true; setPauseObjective(STAGES[G.current.currentLevel - 1].objective); setShowPause(true); }}
-            style={{ width: 34, height: 34, borderRadius: 10, background: '#0f172a', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b' }}>
-            <i className="fa-solid fa-pause" style={{ fontSize: 13 }} />
-          </button>
-        </div>
-      </header>
-
-      {/* منطقة اللعب والـ Canvas */}
-      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
-        <div style={{ flex: 1, height: '100%', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block', background: '#020617' }} />
-
-          {/* لوحة عرض الأهداف المستمرة والكومبو */}
-          <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10, maxWidth: 195, pointerEvents: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {comboCount > 1 && (
-              <div style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 10, padding: '4px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', animation: 'pulse 1s infinite' }}>
-                <span style={{ fontSize: 10, fontWeight: 900, color: '#ffffff' }}>كومبو حماسي!</span>
-                <span style={{ fontSize: 12, fontWeight: 900, color: '#ffffff' }}>x{comboCount}</span>
-              </div>
-            )}
-            <div style={{ background: 'rgba(2,6,23,0.82)', backdropFilter: 'blur(16px)', border: '1px solid rgba(56,189,248,0.22)', borderRadius: 14, padding: '7px 11px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <span style={{ fontSize: 9, color: '#38bdf8', fontWeight: 800, letterSpacing: 0.5 }}>المهمة الحالية</span>
-                <span style={{ fontSize: 10, fontWeight: 900, color: '#7dd3fc', background: 'rgba(56,189,248,0.12)', padding: '1px 7px', borderRadius: 999, border: '1px solid rgba(56,189,248,0.2)' }}>{hudObjectiveProgress}</span>
-              </div>
-              <p style={{ fontSize: 10, color: '#e2e8f0', lineHeight: 1.45, margin: 0 }}>{hudObjectiveText}</p>
-            </div>
-          </div>
-
-          {/* أيقونة فتح سجل الحواس السيكولوجي */}
-          <button onClick={() => setShowSensory(true)}
-            style={{ position: 'absolute', top: 12, left: 12, zIndex: 10, width: 38, height: 38, borderRadius: 12, background: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(168,85,247,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a855f7', cursor: 'pointer', boxShadow: '0 4px 12px rgba(168,85,247,0.15)' }}>
-            <i className="fa-solid fa-brain" style={{ fontSize: 15 }} />
-          </button>
-
-          {/* لوحة التحكم للأجهزة المحمولة مع إضافة زر الاندفاع الجديد */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20, padding: '12px 16px 20px', background: 'linear-gradient(to top, rgba(2,6,23,0.97) 0%, rgba(2,6,23,0.6) 70%, transparent 100%)', pointerEvents: 'none' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', pointerEvents: 'none' }}>
-
-              {/* أزرار الاتجاهات (يمين ويسار) */}
-              <div style={{ display: 'flex', gap: 10, pointerEvents: 'auto' }}>
-                <button
-                  onPointerDown={(e) => { e.preventDefault(); G.current.touchRight = true; }}
-                  onPointerUp={(e) => { e.preventDefault(); G.current.touchRight = false; }}
-                  onPointerLeave={() => { G.current.touchRight = false; }}
-                  style={{ width: 62, height: 62, borderRadius: 20, background: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(8px)', border: '2px solid rgba(56,189,248,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8', fontSize: 20, cursor: 'pointer', touchAction: 'none', boxShadow: '0 4px 16px rgba(56,189,248,0.12)' }}>
-                  <i className="fa-solid fa-arrow-right" />
-                </button>
-                <button
-                  onPointerDown={(e) => { e.preventDefault(); G.current.touchLeft = true; }}
-                  onPointerUp={(e) => { e.preventDefault(); G.current.touchLeft = false; }}
-                  onPointerLeave={() => { G.current.touchLeft = false; }}
-                  style={{ width: 62, height: 62, borderRadius: 20, background: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(8px)', border: '2px solid rgba(56,189,248,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8', fontSize: 20, cursor: 'pointer', touchAction: 'none', boxShadow: '0 4px 16px rgba(56,189,248,0.12)' }}>
-                  <i className="fa-solid fa-arrow-left" />
-                </button>
-              </div>
-
-              {/* أزرار الإجراءات الخاصة بالاندفاع (Dash) والقفز */}
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', pointerEvents: 'auto' }}>
-                {/* زر الاندفاع الجديد مع حلقة تبريد مرئية */}
-                <button
-                  onPointerDown={(e) => { e.preventDefault(); triggerDash(); }}
-                  style={{
-                    width: 58,
-                    height: 58,
-                    borderRadius: '50%',
-                    background: dashCooldownPercent > 0 ? '#1e293b' : 'linear-gradient(135deg, #a855f7, #ec4899)',
-                    border: `2px solid ${dashCooldownPercent > 0 ? '#475569' : '#f472b6'}`,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    fontSize: 16,
-                    cursor: 'pointer',
-                    touchAction: 'none',
-                    boxShadow: '0 4px 16px rgba(168,85,247,0.3)'
-                  }}>
-                  <i className="fa-solid fa-bolt" />
-                  <span style={{ fontSize: 8, marginTop: 1, fontWeight: 800 }}>
-                    {dashCooldownPercent > 0 ? `${Math.ceil(dashCooldownPercent / 10)}%` : 'اندفاع'}
-                  </span>
-                </button>
-
-                {/* زر القفز */}
-                <button
-                  onPointerDown={(e) => { e.preventDefault(); handleJump(); }}
-                  style={{ width: 74, height: 74, borderRadius: '50%', background: 'linear-gradient(135deg, #38bdf8 0%, #6366f1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fff', border: '2.5px solid rgba(255,255,255,0.25)', cursor: 'pointer', touchAction: 'none', boxShadow: '0 6px 24px rgba(56,189,248,0.45)' }}>
-                  <i className="fa-solid fa-arrow-up" />
-                </button>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        {/* الشريط الجانبي للشاشات الكبيرة */}
-        <aside style={{ display: 'none', width: 320, background: 'rgba(15,23,42,0.95)', borderRight: '1px solid rgba(56,189,248,0.1)', padding: 16, flexDirection: 'column', gap: 16, overflowY: 'auto', flexShrink: 0 }}
-          className="lg-sidebar">
-          <div style={{ padding: 12, background: 'linear-gradient(to bottom right, #1e293b, #0f172a)', borderRadius: 12, border: '1px solid rgba(56,189,248,0.2)', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(56,189,248,0.1)', border: '2px solid #38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>💡</div>
-            <div>
-              <h3 style={{ fontWeight: 700, color: '#7dd3fc', fontSize: 14, margin: 0 }}>نور: صعود البيانات</h3>
-              <p style={{ fontSize: 10, color: '#94a3b8', margin: 0 }}>مواجهة تحديات التحول الرقمي</p>
-            </div>
-          </div>
-          <div style={{ background: 'rgba(15,23,42,0.85)', border: '1.5px solid rgba(56,189,248,0.25)', borderRadius: 12, padding: 12, flex: 1 }}>
-            <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>الأهداف الحالية للمرحلة</span>
-            <div style={{ fontSize: 12, textAlign: 'right', color: '#cbd5e1' }} dangerouslySetInnerHTML={{ __html: sidebarHtml }} />
-          </div>
-          <div style={{ background: '#020617', padding: 8, borderRadius: 8, border: '1px solid #1e293b' }}>
-            <span style={{ fontSize: 9, fontWeight: 700, color: '#0ea5e9', display: 'block', marginBottom: 4, fontFamily: 'monospace' }}>{`> السجل السيكولوجي (Stress Log)`}</span>
-            <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#94a3b8', height: 96, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}
-              dangerouslySetInnerHTML={{ __html: logLines.join('<br/>') }} />
-          </div>
-        </aside>
-      </main>
-
-      {/* شاشة الترحيب واختيار مستويات الصعوبة والمراحل */}
-      {showWelcome && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.97)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px 12px', overflowY: 'auto' }}>
-          <div style={{ width: '100%', maxWidth: 480, background: 'linear-gradient(160deg,#0f172a 0%,#0a0f1e 100%)', border: '1px solid rgba(56,189,248,0.22)', borderRadius: 28, padding: '22px 18px', textAlign: 'right', margin: 'auto', boxShadow: '0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(56,189,248,0.06)' }}>
-
-            {/* العنوان والشعار الرئيسي */}
-            <div style={{ textAlign: 'center', marginBottom: 22 }}>
-              <div style={{ width: 56, height: 56, borderRadius: 18, background: 'linear-gradient(135deg,rgba(56,189,248,0.25),rgba(99,102,241,0.25))', border: '2px solid rgba(56,189,248,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, margin: '0 auto 12px', boxShadow: '0 0 24px rgba(56,189,248,0.2)' }}>💡</div>
-              <h2 style={{ fontSize: 20, fontWeight: 900, background: 'linear-gradient(to left, #38bdf8, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 6px', letterSpacing: 0.5 }}>نور: صعود لوحة البيانات</h2>
-              <p style={{ fontSize: 11, color: '#64748b', margin: 0, lineHeight: 1.5 }}>العب بالبطلة نور وشاح النيون المضيء ومساعدها الطائر، تفادى ثقوب الجاذبية والاندفاع لتجاوز الأخطاء!</p>
-            </div>
-
-            {/* خيار مستويات الصعوبة والتوتر */}
-            <div style={{ marginBottom: 16 }}>
-              <span style={{ fontSize: 10, fontWeight: 800, color: '#38bdf8', display: 'block', marginBottom: 10, letterSpacing: 0.5 }}>مستوى الضغط السلوكي (الصعوبة):</span>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-                {[['easy','🟢','مستقر','سهل'],['medium','🟡','مضغوط','متوسط'],['hard','🔴','حرج','صعب']].map(([lvl, emoji, label, sub]) => {
-                  const active = difficulty === lvl;
-                  return (
-                    <button key={lvl} onClick={() => handleDifficultyChange(lvl)}
-                      style={{ padding: '10px 6px', borderRadius: 14, border: `1.5px solid ${active ? 'rgba(56,189,248,0.5)' : 'rgba(255,255,255,0.06)'}`, background: active ? 'rgba(56,189,248,0.12)' : 'rgba(255,255,255,0.03)', color: active ? '#7dd3fc' : '#64748b', fontWeight: 700, fontSize: 11, cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center' }}>
-                      <div style={{ fontSize: 16, marginBottom: 3 }}>{emoji}</div>
-                      <div style={{ fontWeight: 800 }}>{label}</div>
-                      <div style={{ fontSize: 9, opacity: 0.7, fontWeight: 400 }}>{sub}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* شبكة المراحل المتاحة والقطاعات الرقمية */}
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.05)', marginBottom: 18 }}>
-              <span style={{ fontSize: 10, fontWeight: 800, color: '#38bdf8', display: 'block', marginBottom: 10, letterSpacing: 0.5 }}>اختر المرحلة ومسار الأزمة البرمجية:</span>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, maxHeight: 180, overflowY: 'auto' }}>
-                {STAGES.map(stage => {
-                  const isUnlocked = stage.id <= unlockedLevel;
-                  const isSelected = stage.id === selectedLevel;
-                  const isBoss = stage.objType === 'boss';
-                  return (
-                    <div key={stage.id} onClick={() => handleSelectStage(stage.id)}
-                      style={{ padding: '10px 12px', borderRadius: 14, border: `1.5px solid ${isSelected ? '#38bdf8' : isUnlocked ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)'}`, background: isSelected ? 'rgba(56,189,248,0.1)' : isUnlocked ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.2)', color: isSelected ? '#7dd3fc' : isUnlocked ? '#e2e8f0' : '#334155', opacity: isUnlocked ? 1 : 0.5, cursor: isUnlocked ? 'pointer' : 'not-allowed', textAlign: 'right', position: 'relative', overflow: 'hidden', transition: 'all 0.15s' }}>
-                      {isSelected && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(56,189,248,0.07) 0%, transparent 60%)', borderRadius: 13, pointerEvents: 'none' }} />}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                        <span style={{ fontSize: 8, color: isUnlocked ? (isBoss ? '#f43f5e' : '#38bdf8') : '#334155', fontWeight: 700, background: isUnlocked ? (isBoss ? 'rgba(244,63,94,0.1)' : 'rgba(56,189,248,0.1)') : 'transparent', padding: '1px 6px', borderRadius: 999 }}>مرحلة {stage.id}</span>
-                        <span style={{ fontSize: 12 }}>{isUnlocked ? (isSelected ? '🟢' : isBoss ? '🔥' : '⚪') : '🔒'}</span>
-                      </div>
-                      <h4 style={{ fontSize: 11, fontWeight: 800, margin: 0, lineHeight: 1.3 }}>{stage.title}</h4>
-                      <p style={{ fontSize: 9, color: '#64748b', margin: '4px 0 0', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{stage.chapter}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <button onClick={handleLaunch}
-              style={{ width: '100%', padding: '15px 0', background: 'linear-gradient(to left, #0ea5e9, #6366f1)', borderRadius: 18, fontWeight: 800, color: '#fff', fontSize: 15, cursor: 'pointer', border: 'none', boxShadow: '0 8px 32px rgba(56,189,248,0.35), 0 2px 0 rgba(255,255,255,0.1) inset', letterSpacing: 0.5 }}>
-              ⚡ تشغيل وتهيئة المحاكاة
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* شاشة الإيقاف المؤقت للعبة */}
-      {showPause && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.9)', backdropFilter: 'blur(8px)', zIndex: 45, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ width: '100%', maxWidth: 360, background: '#0f172a', border: '1px solid #1e293b', borderRadius: 24, padding: 20, textAlign: 'right' }}>
-            <h3 style={{ fontWeight: 700, fontSize: 18, color: '#e2e8f0', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
-              لوحة التحكم وخيارات الجولة <i className="fa-solid fa-gear" style={{ color: '#38bdf8' }} />
-            </h3>
-            <p style={{ fontSize: 10, color: '#94a3b8', marginBottom: 16 }}>أوقف الصعود لتعديل مستوى الضغط الحالي ومراجعة متطلبات قطاعك الحالي.</p>
-            <div style={{ marginBottom: 12 }}>
-              <span style={{ fontSize: 10, color: '#94a3b8', display: 'block', marginBottom: 8 }}>تعديل مؤشر الضغط (الصعوبة) فوراً:</span>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {['easy', 'medium', 'hard'].map(lvl => {
-                  const labels = { easy: 'مستقر', medium: 'مضغوط', hard: 'حرج' };
-                  const active = difficulty === lvl;
-                  return (
-                    <button key={lvl} onClick={() => handleRebuildAndResume(lvl)}
-                      style={{ flex: 1, padding: '8px 0', borderRadius: 8, border: `1px solid ${active ? 'rgba(56,189,248,0.4)' : '#334155'}`, background: active ? 'rgba(56,189,248,0.1)' : '#1e293b', color: active ? '#7dd3fc' : '#94a3b8', fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
-                      {labels[lvl]}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div style={{ padding: 12, background: '#020617', borderRadius: 12, border: '1px solid #1e293b', marginBottom: 16 }}>
-              <span style={{ fontSize: 9, color: '#38bdf8', fontWeight: 700, display: 'block' }}>المطلوب لإصلاح هذا القطاع:</span>
-              <p style={{ fontSize: 10, color: '#cbd5e1', margin: '4px 0 0' }}>{pauseObjective}</p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button onClick={handleResume} style={{ padding: '10px 0', background: '#0ea5e9', color: '#020617', borderRadius: 12, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer' }}>العودة لمتابعة الصعود</button>
-              <button onClick={handleAbortToMenu} style={{ padding: '10px 0', background: '#1e293b', color: '#94a3b8', borderRadius: 12, fontWeight: 700, fontSize: 12, border: '1px solid #334155', cursor: 'pointer' }}>إنهاء الجولة والعودة للرئيسية</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* لوحة الحوار التفاعلية المنبثقة للقصة وعناصر الإدارة والموارد البشرية */}
-      {showDialogue && dialogueData && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.8)', backdropFilter: 'blur(4px)', zIndex: 40, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 16 }}>
-          <div style={{ width: '100%', maxWidth: 512, background: 'rgba(15,23,42,0.95)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: 16, padding: 20, textAlign: 'right' }}>
-            <span style={{ background: '#a855f7', color: '#020617', fontSize: 9, fontWeight: 900, padding: '2px 12px', borderRadius: 999, display: 'inline-block', marginBottom: 8 }}>مداولة تشغيلية حاسمة</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, borderBottom: '1px solid #1e293b', paddingBottom: 8 }}>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ fontWeight: 700, color: '#c084fc', fontSize: 12, margin: 0 }}>{dialogueData.npc.name}</h4>
-                <p style={{ fontSize: 9, color: '#94a3b8', margin: 0 }}>{dialogueData.npc.type === 'board_npc' ? dialogueData.npc.title : 'فريق البنية التحتية'}</p>
-              </div>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(168,85,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>👤</div>
-            </div>
-            <p style={{ fontSize: 12, color: '#e2e8f0', lineHeight: 1.6, marginBottom: 16 }}>{dialogueData.text}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {dialogueData.options.map((opt, i) => (
-                <button key={i} onClick={() => { opt.cb(); closeDialogue(); }}
-                  style={{ width: '100%', textAlign: 'right', padding: 12, background: '#1e293b', border: '1px solid #334155', borderRadius: 16, fontSize: 11, color: '#f1f5f9', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s' }}>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* شاشة العرض الحسي الجانبي والذكريات والملاحظات */}
-      {showSensory && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.9)', backdropFilter: 'blur(8px)', zIndex: 35, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ width: '100%', maxWidth: 320, background: '#0f172a', border: '1px solid rgba(168,85,247,0.3)', borderRadius: 24, padding: 16, textAlign: 'right', position: 'relative' }}>
-            <button onClick={() => setShowSensory(false)}
-              style={{ position: 'absolute', top: 12, left: 12, width: 32, height: 32, borderRadius: '50%', background: '#1e293b', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', cursor: 'pointer', fontSize: 12 }}>
-              <i className="fa-solid fa-xmark" />
-            </button>
-            <h3 style={{ fontWeight: 700, fontSize: 14, color: '#c084fc', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
-              سجل الحواس والذكريات <i className="fa-solid fa-brain" />
-            </h3>
-            <div style={{ maxHeight: 240, overflowY: 'auto', marginBottom: 16, fontSize: 12, color: '#cbd5e1' }} dangerouslySetInnerHTML={{ __html: sidebarHtml }} />
-            <button onClick={() => setShowSensory(false)}
-              style={{ width: '100%', padding: '10px 0', background: '#1e293b', color: '#94a3b8', borderRadius: 12, fontSize: 12, fontWeight: 700, border: '1px solid #334155', cursor: 'pointer' }}>
-              إغلاق السجل
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 👑 شاشة النصر والنجاح النهائي الفاتنة 👑 */}
-      {showVictory && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.96)', backdropFilter: 'blur(12px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ width: '100%', maxWidth: 440, background: 'linear-gradient(145deg, #151d35 0%, #070a14 100%)', border: '2px solid rgba(16,185,129,0.35)', borderRadius: 24, padding: '28px 20px', textAlign: 'center', boxShadow: '0 20px 50px rgba(16,185,129,0.15)' }}>
-            <div style={{ width: 68, height: 68, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 16px', color: '#10b981', animation: 'pulse 2s infinite' }}>🏆</div>
-            <h2 style={{ fontSize: 22, fontWeight: 900, color: '#10b981', margin: '0 0 8px' }}>نصر كامل! تم التطهير التام</h2>
-            <p style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 20 }}>
-              تهانينا الكبرى! لقد اجتزتِ كافة قطاعات لوحة البيانات بنجاح باهر! 
-              استطاعت نور الحفاظ على اتزانها، حماية فريق العمل، وحل الأزمات الإدارية بحكمة باستخدام الاندفاع الخارق، وهزمت عواصف الأخطاء ووحش الاحتراق لتستعيد سكينتها التامة.
-            </p>
-            <div style={{ padding: '12px 14px', background: 'rgba(2,6,23,0.4)', borderRadius: 16, border: '1.5px dashed rgba(16,185,129,0.2)', marginBottom: 24 }}>
-              <span style={{ fontSize: 10, color: '#10b981', fontWeight: 800, display: 'block', textTransform: 'uppercase', marginBottom: 4 }}>الملف التوثيقي المنجز</span>
-              <p style={{ fontSize: 11, color: '#e2e8f0', margin: 0 }}>تمت موازنة لوحة القيادة وحمايتها بالكامل بنسبة استقرار نموذجية 100%.</p>
-            </div>
-            <button onClick={handleResetGameAfterVictory}
-              style={{ width: '100%', padding: '14px 0', background: 'linear-gradient(to left, #10b981, #059669)', border: 'none', borderRadius: 16, fontWeight: 800, color: '#fff', fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 16px rgba(16,185,129,0.3)', transition: 'all 0.2s' }}>
-              🔄 إعادة محاكاة الصعود من البداية
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* كود التخصيص الداخلي للشاشات والأنماط */}
-      <style>{`
-        @media (min-width: 1024px) {
-          .lg-sidebar { display: flex !important; }
-        }
-        * { box-sizing: border-box; touch-action: manipulation; }
-        body { overflow: hidden; }
-        @keyframes pulse {
-          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129, 0.4); }
-          70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16,185,129, 0); }
-          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129, 0); }
-        }
-      `}</style>
-    </div>
-  );
-}
+    updateLogsUI();
+    
+    // تشغيل المحرك والرسوم المتحركة
+    raf = requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
